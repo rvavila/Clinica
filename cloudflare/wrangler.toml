@@ -5,7 +5,7 @@ compatibility_date = "2026-09-07"
 [[d1_databases]]
 binding = "DB"
 database_name = "clinica-db"
-database_id = "PREENCHER_COM_O_ID_DO_D1"
+database_id = "54387694-5a9f-4b58-b1b6-e69344f7f780"
 
 [vars]
 APP_NAME = "Clínica Médica API"
