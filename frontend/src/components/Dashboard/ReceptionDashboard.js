@@ -437,39 +437,31 @@ const ReceptionDashboard = () => {
         <h2>Cadastrar Paciente</h2>
         {patientError && <div className="alert alert-error">{patientError}</div>}
         {patientSuccess && <div className="alert alert-success">{patientSuccess}</div>}
-        <form className="appointment-form" onSubmit={handleCreatePatient}>
-          <label>
-            Nome completo
-            <input name="full_name" value={patientFormData.full_name} onChange={handlePatientChange} required />
-          </label>
-          <label>
-            Email
-            <input name="email" type="email" value={patientFormData.email} onChange={handlePatientChange} required />
-          </label>
-          <label>
-            CPF
-            <input name="cpf" value={patientFormData.cpf} onChange={handlePatientChange} minLength="11" required />
-          </label>
-          <label>
-            Telefone
-            <input name="phone" value={patientFormData.phone} onChange={handlePatientChange} />
-          </label>
-          <label>
-            Data de nascimento
-            <input name="date_of_birth" type="date" value={patientFormData.date_of_birth} onChange={handlePatientChange} />
-          </label>
-          <label>
-            Sexo
-            <select name="gender" value={patientFormData.gender} onChange={handlePatientChange}>
-              <option value="">Não informado</option>
-              <option value="Feminino">Feminino</option>
-              <option value="Masculino">Masculino</option>
-            </select>
-          </label>
-          <label>
-            Senha inicial
-            <input name="password" type="password" value={patientFormData.password} onChange={handlePatientChange} minLength="8" required />
-          </label>
+        <form className="appointment-form patient-register-form" onSubmit={handleCreatePatient}>
+          <fieldset className="form-section-card">
+            <legend>Dados pessoais</legend>
+            <div className="form-section-grid">
+              <label>Nome completo<input name="full_name" value={patientFormData.full_name} onChange={handlePatientChange} required /></label>
+              <label>Email<input name="email" type="email" value={patientFormData.email} onChange={handlePatientChange} required /></label>
+              <label>CPF<input name="cpf" value={patientFormData.cpf} onChange={handlePatientChange} minLength="11" required /></label>
+              <label>Telefone<input name="phone" value={patientFormData.phone} onChange={handlePatientChange} /></label>
+            </div>
+          </fieldset>
+
+          <fieldset className="form-section-card">
+            <legend>Informações do paciente</legend>
+            <div className="form-section-grid">
+              <label>Data de nascimento<input name="date_of_birth" type="date" value={patientFormData.date_of_birth} onChange={handlePatientChange} /></label>
+              <label>Sexo<select name="gender" value={patientFormData.gender} onChange={handlePatientChange}><option value="">Não informado</option><option value="Feminino">Feminino</option><option value="Masculino">Masculino</option></select></label>
+            </div>
+          </fieldset>
+
+          <fieldset className="form-section-card form-section-access">
+            <legend>Acesso</legend>
+            <div className="form-section-grid">
+              <label>Senha inicial<input name="password" type="password" value={patientFormData.password} onChange={handlePatientChange} minLength="8" required /></label>
+            </div>
+          </fieldset>
           <button type="submit" className="btn btn-primary" disabled={patientSaving}>
             {patientSaving ? 'Salvando...' : 'Cadastrar paciente'}
           </button>

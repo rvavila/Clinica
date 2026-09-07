@@ -444,6 +444,70 @@
   }
 }
 
+/* Cadastro do paciente agrupado em poucos blocos compactos. */
+.appointment-form.patient-register-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .8rem;
+  padding: .9rem;
+  background: #eef5f2;
+}
+
+.form-section-card {
+  min-width: 0;
+  margin: 0;
+  padding: .65rem .8rem .8rem;
+  border: 1px solid #d2e2dc;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 5px 15px rgba(33, 79, 80, .05);
+}
+
+.form-section-card:first-of-type { grid-column: 1 / -1; }
+
+.form-section-card legend {
+  padding: 0 .4rem;
+  color: #2f716c;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.form-section-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .55rem .7rem;
+}
+
+.form-section-access .form-section-grid { grid-template-columns: 1fr; }
+
+.form-section-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  min-width: 0;
+  color: #344c4e;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.form-section-grid input,
+.form-section-grid select {
+  height: 2.55rem;
+  padding: .55rem .7rem;
+  background: #f9fbfa;
+}
+
+.form-section-grid label:focus-within { color: #205e59; }
+.patient-register-form > .btn { justify-self: start; min-width: 12rem; }
+
+@media (max-width: 700px) {
+  .appointment-form.patient-register-form { grid-template-columns: 1fr; padding: .65rem; }
+  .form-section-card, .form-section-card:first-of-type { grid-column: 1; }
+  .form-section-grid { grid-template-columns: 1fr; }
+  .patient-register-form > .btn { width: 100%; }
+}
+
 /* Experiência mobile: o painel se adapta sem cortar informações nem ações. */
 @media (max-width: 600px) {
   .dashboard-header { padding: .8rem 0; }
