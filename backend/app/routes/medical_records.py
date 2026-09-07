@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api/medical-records", tags=["medical-records"])
 
 
 def _can_access(record, current_user, db):
-    if current_user["role"] in {UserRole.RECEPTION.value, UserRole.ADMIN.value}:
+    if current_user["role"] == UserRole.ADMIN.value:
         return True
     patient = PatientCRUD.get_by_id(db, record.patient_id)
     doctor = DoctorCRUD.get_by_id(db, record.doctor_id)
@@ -30,6 +30,8 @@ async def list_medical_records(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    if current_user["role"] == UserRole.RECEPTION.value:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="A recepção não possui acesso aos laudos.")
     records = db.query(MedicalRecord).outerjoin(Appointment).filter(
         (MedicalRecord.appointment_id.is_(None)) | (Appointment.status != AppointmentStatus.CANCELLED)
     )

@@ -5,7 +5,6 @@ import patientService from '../../services/patientService';
 import userService from '../../services/userService';
 import notificationService from '../../services/notificationService';
 import { appointmentStatusLabel, consultationTypeLabel } from '../../utils/appointmentLabels';
-import medicalRecordService from '../../services/medicalRecordService';
 
 const appointmentTimeSlots = Array.from({ length: 25 }, (_, index) => {
   const totalMinutes = 8 * 60 + index * 30;
@@ -23,8 +22,6 @@ const ReceptionDashboard = () => {
   const [doctors, setDoctors] = useState([]);
   const [unassignedDoctors, setUnassignedDoctors] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [medicalRecords, setMedicalRecords] = useState([]);
-  const [selectedMedicalRecord, setSelectedMedicalRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [patientSaving, setPatientSaving] = useState(false);
@@ -86,20 +83,18 @@ const ReceptionDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [appointmentData, patientData, doctorData, unassignedDoctorData, notificationData, recordData] = await Promise.all([
+        const [appointmentData, patientData, doctorData, unassignedDoctorData, notificationData] = await Promise.all([
           appointmentService.list(0, 100),
           patientService.list(0, 100),
           doctorService.list(0, 100),
           doctorService.listUnassignedUsers(),
           notificationService.list(),
-          medicalRecordService.list(),
         ]);
         setAppointments(appointmentData);
         setPatients(patientData);
         setDoctors(doctorData);
         setUnassignedDoctors(unassignedDoctorData);
         setNotifications(notificationData);
-        setMedicalRecords(recordData);
       } catch (error) {
         setFormError(error.response?.data?.detail || 'Erro ao carregar dados da recepção');
       } finally {
@@ -843,7 +838,6 @@ const ReceptionDashboard = () => {
                       </span>
                     </td>
                     <td>
-                      {medicalRecords.find((record) => record.appointment_id === appt.id) && <button type="button" className="btn btn-secondary" onClick={() => setSelectedMedicalRecord(selectedMedicalRecord?.appointment_id === appt.id ? null : medicalRecords.find((record) => record.appointment_id === appt.id))}>{selectedMedicalRecord?.appointment_id === appt.id ? 'Fechar laudo' : 'Ver laudo'}</button>}{' '}
                       {['scheduled', 'confirmed'].includes(appt.status) ? (
                         <div className="form-actions">
                           <button type="button" className="btn btn-secondary" onClick={() => handleReceptionReschedule(appt)}>Alterar data</button>
@@ -852,15 +846,6 @@ const ReceptionDashboard = () => {
                       ) : '—'}
                     </td>
                   </tr>
-                  {selectedMedicalRecord?.appointment_id === appt.id && <tr className="expanded-record-row"><td colSpan="7">
-                    <div className="inline-medical-record">
-                      <h3>Laudo da consulta</h3>
-                      <p><strong>Diagnóstico:</strong> {selectedMedicalRecord.diagnosis}</p>
-                      {selectedMedicalRecord.treatment_plan && <p><strong>Tratamento:</strong> {selectedMedicalRecord.treatment_plan}</p>}
-                      {selectedMedicalRecord.prescription && <p><strong>Medicamentos, horários e dias:</strong><br />{selectedMedicalRecord.prescription}</p>}
-                      {selectedMedicalRecord.medical_certificate && <p><strong>Atestado:</strong><br />{selectedMedicalRecord.medical_certificate}</p>}
-                    </div>
-                  </td></tr>}
                   </React.Fragment>
                 ))}
               </tbody>
