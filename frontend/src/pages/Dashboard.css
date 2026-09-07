@@ -888,11 +888,26 @@
 .dashboard-section { margin-bottom: 1.35rem; }
 .doctor-tabs, .reception-nav { margin-bottom: 1.15rem; }
 .patient-prescription-cell {
-  min-width: 15rem;
-  max-width: 24rem;
-  white-space: pre-line !important;
-  line-height: 1.45;
+  min-width: 9rem;
+  white-space: nowrap !important;
 }
+
+.medication-toggle { padding: .5rem .7rem; font-size: .8rem; }
+.expanded-medication-row td,
+.expanded-medication-row td:hover { background: #f3f8f6 !important; }
+.patient-medication-box {
+  max-width: 760px;
+  padding: 1rem 1.1rem;
+  border: 1px solid #cfe1da;
+  border-left: 4px solid var(--teal);
+  border-radius: 10px;
+  background: #ffffff;
+  color: #263e40;
+  white-space: normal;
+  box-shadow: 0 7px 18px rgba(33, 79, 80, .07);
+}
+.patient-medication-box strong { display: block; margin-bottom: .45rem; color: #245d58; }
+.patient-medication-box p { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
 
 @media (max-width: 600px) {
   .dashboard-main { padding: .9rem .7rem 1.75rem !important; }

@@ -9,6 +9,7 @@ const PatientDashboard = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [records, setRecords] = useState([]);
+  const [expandedMedicationId, setExpandedMedicationId] = useState(null);
   const currentMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey);
 
@@ -110,7 +111,6 @@ const PatientDashboard = () => {
             <thead>
               <tr>
                 <th>Médico</th>
-                <th>Especialidade</th>
                 <th>Data/Hora</th>
                 <th>Status</th>
                 <th>Medicação receitada</th>
@@ -122,7 +122,6 @@ const PatientDashboard = () => {
                 <React.Fragment key={appt.id}>
                 <tr>
                   <td>{appt.doctor_name}</td>
-                  <td>{appt.doctor_specialty}</td>
                   <td>{new Date(appt.appointment_datetime).toLocaleString()}</td>
                   <td>
                     <span className={`status-badge status-${appt.status}`}>
@@ -130,7 +129,15 @@ const PatientDashboard = () => {
                     </span>
                   </td>
                   <td className="patient-prescription-cell">
-                    {records.find((record) => record.appointment_id === appt.id)?.prescription || 'Não disponível'}
+                    {records.find((record) => record.appointment_id === appt.id)?.prescription ? (
+                      <button
+                        type="button"
+                        className="btn btn-secondary medication-toggle"
+                        onClick={() => setExpandedMedicationId(expandedMedicationId === appt.id ? null : appt.id)}
+                      >
+                        {expandedMedicationId === appt.id ? 'Fechar medicação' : 'Ver medicação'}
+                      </button>
+                    ) : 'Não disponível'}
                   </td>
                   <td>
                     {['scheduled', 'confirmed', 'Agendada', 'agendada'].includes(appt.status) ? (
@@ -144,6 +151,12 @@ const PatientDashboard = () => {
                     )}
                   </td>
                 </tr>
+                {expandedMedicationId === appt.id && <tr className="expanded-medication-row"><td colSpan="5">
+                  <div className="patient-medication-box">
+                    <strong>Medicação receitada</strong>
+                    <p>{records.find((record) => record.appointment_id === appt.id)?.prescription}</p>
+                  </div>
+                </td></tr>}
                 </React.Fragment>
               ))}
             </tbody>
