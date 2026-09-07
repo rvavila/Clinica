@@ -5,13 +5,26 @@ const json = (data, status = 200, origin = '*') => new Response(JSON.stringify(d
 const error = (message, status = 400, origin = '*') => json({ detail: message }, status, origin);
 const now = () => new Date().toISOString();
 const body = async (request) => request.method === 'GET' || request.method === 'DELETE' ? {} : request.json();
+const clinicDateParts = (value) => String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+const clinicInstant = (value) => {
+  const parts = clinicDateParts(value);
+  return parts ? new Date(`${value}${parts[6] ? '' : ':00'}-03:00`) : new Date(NaN);
+};
+const shiftClinicMinutes = (value, minutes) => {
+  const parts = clinicDateParts(value);
+  if (!parts) return value;
+  const wallClock = Date.UTC(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]), Number(parts[4]), Number(parts[5]), Number(parts[6] || 0));
+  return new Date(wallClock + minutes * 60 * 1000).toISOString().slice(0, 19);
+};
 const validateScheduleSlot = (value) => {
-  const date = new Date(value);
-  if (!value || Number.isNaN(date.getTime())) return 'Informe uma data e horário válidos.';
+  const parts = clinicDateParts(value);
+  const date = clinicInstant(value);
+  if (!parts || Number.isNaN(date.getTime())) return 'Informe uma data e horário válidos.';
   if (date <= new Date()) return 'A consulta precisa ser agendada para o futuro.';
-  const hour = date.getHours();
-  const minutes = date.getMinutes();
-  if (![0, 30].includes(minutes) || date.getSeconds() !== 0 || hour < 8 || hour > 22 || (hour === 22 && minutes !== 0)) {
+  const hour = Number(parts[4]);
+  const minutes = Number(parts[5]);
+  const seconds = Number(parts[6] || 0);
+  if (![0, 30].includes(minutes) || seconds !== 0 || hour < 8 || hour > 22 || (hour === 22 && minutes !== 0)) {
     return 'Escolha um horário em intervalos de 30 minutos, entre 08:00 e 22:00.';
   }
   return null;
@@ -74,9 +87,8 @@ export default {
         const data = await body(request);
         const scheduleError = validateScheduleSlot(data.appointment_datetime);
         if (scheduleError) return error(scheduleError, 422, origin);
-        const requestedDate = new Date(data.appointment_datetime);
         const conflict = await env.DB.prepare("SELECT id FROM appointments WHERE doctor_id=? AND status NOT IN ('cancelled','completed') AND appointment_datetime > ? AND appointment_datetime < ? LIMIT 1")
-          .bind(data.doctor_id, new Date(requestedDate.getTime() - 30 * 60 * 1000).toISOString(), new Date(requestedDate.getTime() + 30 * 60 * 1000).toISOString()).first();
+          .bind(data.doctor_id, shiftClinicMinutes(data.appointment_datetime, -30), shiftClinicMinutes(data.appointment_datetime, 30)).first();
         if (conflict) return error('Este horário já está ocupado para o médico.', 409, origin);
         const stamp = now();
         const result = await env.DB.prepare('INSERT INTO appointments (patient_id,doctor_id,room_id,appointment_datetime,duration_minutes,status,consultation_type,notes,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)').bind(data.patient_id, data.doctor_id, data.room_id || null, data.appointment_datetime, data.duration_minutes || 30, 'scheduled', data.consultation_type || 'follow_up', data.notes || null, stamp, stamp).run();
@@ -92,9 +104,8 @@ export default {
         if (data.appointment_datetime) {
           const scheduleError = validateScheduleSlot(data.appointment_datetime);
           if (scheduleError) return error(scheduleError, 422, origin);
-          const requestedDate = new Date(data.appointment_datetime);
           const conflict = await env.DB.prepare("SELECT id FROM appointments WHERE doctor_id=(SELECT doctor_id FROM appointments WHERE id=?) AND id<>? AND status NOT IN ('cancelled','completed') AND appointment_datetime > ? AND appointment_datetime < ? LIMIT 1")
-            .bind(id, id, new Date(requestedDate.getTime() - 30 * 60 * 1000).toISOString(), new Date(requestedDate.getTime() + 30 * 60 * 1000).toISOString()).first();
+            .bind(id, id, shiftClinicMinutes(data.appointment_datetime, -30), shiftClinicMinutes(data.appointment_datetime, 30)).first();
           if (conflict) return error('Este horário já está ocupado para o médico.', 409, origin);
         }
         if (user.role === 'doctor' && data.status === 'in_progress') {
