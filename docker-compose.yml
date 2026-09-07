@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: clinica_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-clinica}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-clinica123}
+      POSTGRES_DB: ${DB_NAME:-clinica}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-clinica}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (FastAPI)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: clinica_backend
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-clinica}:${DB_PASSWORD:-clinica123}@db:5432/${DB_NAME:-clinica}
+      SECRET_KEY: ${SECRET_KEY:-sua-chave-super-secreta}
+      DEBUG: "False"
+      CORS_ORIGINS: '["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"]'
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Frontend (React)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: clinica_frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  # Nginx (optional - for production)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: clinica_nginx
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf
+  #   depends_on:
+  #     - backend
+  #     - frontend
+
+volumes:
+  postgres_data:

@@ -1,0 +1,137 @@
+/* Auth.css - Estilos para login e register */
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background:
+    linear-gradient(135deg, rgba(10, 63, 67, 0.96), rgba(15, 93, 94, 0.88)),
+    repeating-linear-gradient(135deg, transparent 0 22px, rgba(255,255,255,0.04) 23px 24px);
+}
+
+.auth-form {
+  background: var(--surface);
+  padding: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(4, 35, 38, 0.3);
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-form h1 {
+  color: var(--teal);
+  font-family: Georgia, 'Times New Roman', serif;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-size: 1.75rem;
+}
+
+.auth-form h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--ink-soft);
+  font-size: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(15, 93, 94, 0.12);
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.auth-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: var(--ink-soft);
+}
+
+.auth-link a {
+  color: var(--teal);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .auth-form {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .auth-form h1 {
+    font-size: 1.5rem;
+  }
+
+  .auth-form h2 {
+    font-size: 1.25rem;
+  }
+}
+
+.auth-container { position: relative; overflow: hidden; }
+.auth-container::before, .auth-container::after {
+  content: ''; position: fixed; border: 1px solid rgba(231,195,169,.22); border-radius: 50%; pointer-events: none;
+}
+.auth-container::before { width: 520px; height: 520px; left: -300px; top: -180px; }
+.auth-container::after { width: 430px; height: 430px; right: -250px; bottom: -190px; }
+.auth-form { position: relative; z-index: 1; border-radius: 18px; padding: clamp(1.75rem, 5vw, 2.8rem); }
+.auth-form h1 { letter-spacing: -.03em; }
+.auth-form h1::before { content: '+'; display: inline-grid; place-items: center; width: 2rem; height: 2rem; margin-right: .5rem; border-radius: 9px; background: #e7c3a9; color: var(--teal-dark); font: 1.5rem/1 'Segoe UI', sans-serif; vertical-align: -0.2rem; }
+.form-group input, .form-group select { border-radius: 10px; }
+
+/* Acesso com identidade futurista */
+.auth-container { background: radial-gradient(circle at 20% 15%, rgba(40, 215, 192, .18), transparent 24rem), radial-gradient(circle at 85% 85%, rgba(169, 140, 255, .2), transparent 26rem), #061522; }
+.auth-form { background: rgba(9, 29, 45, .84); border: 1px solid rgba(95, 205, 215, .3); box-shadow: 0 28px 90px rgba(0, 0, 0, .42), 0 0 40px rgba(40, 215, 192, .08); backdrop-filter: blur(18px); }
+.auth-form h1 { color: #dffffb; }
+.auth-form h2, .auth-link { color: var(--ink-soft); }
+.form-group label { color: #c7e2e4; }
+.auth-link a { color: var(--teal); }
+
+/* Acesso com aparência de consultório contemporâneo */
+.auth-container { background: linear-gradient(135deg, #e7f0ec, #f8faf7 55%, #dceae5); }
+.auth-container::before, .auth-container::after { border-color: rgba(47, 113, 108, .13); }
+.auth-form { background: rgba(255, 255, 255, .94); border: 1px solid #dce8e3; box-shadow: 0 24px 60px rgba(33, 79, 80, .14); backdrop-filter: none; }
+.auth-form h1 { color: var(--teal-dark); }
+.auth-form h1::before { background: var(--clay); color: white; }
+.auth-form h2, .auth-link { color: var(--ink-soft); }
+.form-group label { color: var(--ink); }
+
+.auth-container button:hover, .auth-container .btn:hover { color: #24363a !important; }
+.auth-container .btn-primary:hover { color: #ffffff !important; }
