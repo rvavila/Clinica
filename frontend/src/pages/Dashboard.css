@@ -345,6 +345,105 @@
 .dashboard-container .btn-secondary:hover, .dashboard-container .doctor-tabs button:hover:not(.active), .dashboard-container .reception-nav button:hover:not(.active) { background: #d8e9e4 !important; color: #214f50 !important; }
 .appointments-table tbody tr:hover, .appointments-table tbody tr:hover td { background: #f1f8f5 !important; color: #24363a !important; }
 
+/* Correção final para telas estreitas; precisa permanecer no fim do arquivo. */
+@media (max-width: 600px) {
+  .dashboard-container,
+  .dashboard-main,
+  .dashboard-main > div,
+  .dashboard-section,
+  .card,
+  .appointment-form,
+  .appointment-filters,
+  .doctor-call-panel,
+  .reception-call-panel,
+  .reception-today-list,
+  .notification-list {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .dashboard-header .header-content {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 .75rem;
+  }
+
+  .brand-lockup,
+  .header-user,
+  .user-meta,
+  .doctor-call-panel > div,
+  .reception-call-panel > div,
+  .today-appointment-card > div {
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+
+  .brand-lockup h1,
+  .doctor-call-panel h2,
+  .reception-call-panel h2,
+  .today-appointment-card strong,
+  .today-appointment-card span {
+    overflow-wrap: anywhere;
+    white-space: normal !important;
+  }
+
+  .doctor-tabs,
+  .reception-nav {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden;
+  }
+
+  .doctor-tabs button,
+  .reception-nav button {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: normal;
+  }
+
+  .today-appointment-card,
+  .today-appointment-actions {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .today-appointment-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .today-appointment-actions .btn,
+  .doctor-call-button,
+  .reception-call-badge {
+    width: 100% !important;
+    min-width: 0 !important;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .card:has(.appointments-table) {
+    overflow: hidden;
+  }
+
+  .appointments-table {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  input, select, textarea, button, .btn {
+    max-width: 100%;
+  }
+}
+
 /* Experiência mobile: o painel se adapta sem cortar informações nem ações. */
 @media (max-width: 600px) {
   .dashboard-header { padding: .8rem 0; }
@@ -657,3 +756,63 @@
 .dashboard-container .reception-nav button:hover, .dashboard-container .doctor-tabs button:hover { background: #d8e9e4 !important; color: #214f50 !important; }
 .dashboard-container .reception-nav button.active:hover, .dashboard-container .doctor-tabs button.active:hover { background: #2f716c !important; color: #ffffff !important; }
 .appointments-table tbody tr:hover, .appointments-table tbody tr:hover td { background: #f1f8f5 !important; color: #24363a !important; }
+
+/* Trava responsiva final: mantém todo o painel dentro da viewport. */
+@media (max-width: 600px) {
+  .dashboard-container, .dashboard-main, .dashboard-main > div,
+  .dashboard-section, .card, .appointment-form, .appointment-filters,
+  .doctor-call-panel, .reception-call-panel, .reception-today-list,
+  .notification-list {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .dashboard-header .header-content { width: 100%; max-width: 100%; padding: 0 .75rem; }
+  .brand-lockup, .header-user, .user-meta,
+  .doctor-call-panel > div, .reception-call-panel > div,
+  .today-appointment-card > div { min-width: 0 !important; max-width: 100%; }
+
+  .brand-lockup h1, .doctor-call-panel h2, .reception-call-panel h2,
+  .today-appointment-card strong, .today-appointment-card span {
+    overflow-wrap: anywhere;
+    white-space: normal !important;
+  }
+
+  .doctor-tabs, .reception-nav {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden;
+  }
+
+  .doctor-tabs button, .reception-nav button {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: normal;
+  }
+
+  .today-appointment-card, .today-appointment-actions { width: 100%; max-width: 100%; }
+  .today-appointment-actions { align-items: stretch; flex-direction: column; }
+  .today-appointment-actions .btn, .doctor-call-button, .reception-call-badge {
+    width: 100% !important;
+    min-width: 0 !important;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .appointments-table {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  input, select, textarea, button, .btn { max-width: 100%; }
+}

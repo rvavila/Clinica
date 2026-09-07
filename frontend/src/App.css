@@ -280,3 +280,14 @@ input:hover::placeholder, textarea:hover::placeholder { color: #718181 !importan
   color: #1f3032 !important;
 }
 .dashboard-container .inline-medical-record h3 { color: #214f50 !important; }
+
+/* Nenhum componente pode ampliar a página além da largura do aparelho. */
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img, svg, canvas {
+  max-width: 100%;
+}
