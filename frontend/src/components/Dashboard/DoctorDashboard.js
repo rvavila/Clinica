@@ -187,10 +187,9 @@ const DoctorDashboard = () => {
           <div className="reception-today-list">
             {todayOpenAppointments.map((appt) => (
               <div className={`today-appointment-card ${appt.status === 'in_progress' ? 'is-active' : ''}`} key={appt.id}>
-                <div>
+                <div className="today-appointment-main">
                   <strong>{appt.patient_name}</strong>
-                  <span>{ageLabel(appt.patient_date_of_birth)} · {appt.doctor_specialty}</span>
-                  <span>{consultationTypeLabel(appt.consultation_type)} · {new Date(appt.appointment_datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span>{ageLabel(appt.patient_date_of_birth)} · {appt.doctor_specialty} · {consultationTypeLabel(appt.consultation_type)} · {new Date(appt.appointment_datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <div className="today-appointment-actions">
                   <span className={`status-badge status-${appt.status}`}>{appointmentStatusLabel(appt.status)}</span>
