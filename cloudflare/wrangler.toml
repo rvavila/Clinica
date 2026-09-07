@@ -1,0 +1,12 @@
+name = "clinica-api"
+main = "src/index.js"
+compatibility_date = "2026-09-07"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "clinica-db"
+database_id = "PREENCHER_COM_O_ID_DO_D1"
+
+[vars]
+APP_NAME = "Clínica Médica API"
+ACCESS_TOKEN_EXPIRE_MINUTES = "30"
