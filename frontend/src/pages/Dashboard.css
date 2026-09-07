@@ -1266,3 +1266,83 @@
 .dashboard-container .reception-today-list .today-appointment-card:hover {
   background: #c2e2d8 !important;
 }
+
+/* Tema clinico definitivo: remove superficies brancas e preserva contraste em todas as telas. */
+.dashboard-container .card,
+.dashboard-container .dashboard-card,
+.dashboard-container .appointment-form,
+.dashboard-container .appointment-filters,
+.dashboard-container .notification-list,
+.dashboard-container .reception-today-list,
+.dashboard-container .doctor-call-panel,
+.dashboard-container .reception-call-panel {
+  background: #e8f1ee !important;
+  border: 2px solid #8fb5aa !important;
+  color: #173638 !important;
+  box-shadow: 0 10px 24px rgba(31, 75, 72, .12) !important;
+}
+
+.dashboard-container .appointment-form {
+  background: #e8f1ee !important;
+}
+
+.dashboard-container .appointment-form textarea,
+.dashboard-container .appointment-form input,
+.dashboard-container .appointment-form select {
+  background: #f7fbfa !important;
+  color: #173638 !important;
+  border: 2px solid #8fb5aa !important;
+}
+
+.dashboard-container .appointment-form textarea:focus,
+.dashboard-container .appointment-form input:focus,
+.dashboard-container .appointment-form select:focus {
+  background: #ffffff !important;
+  border-color: #2f716c !important;
+  box-shadow: 0 0 0 3px rgba(47, 113, 108, .2) !important;
+}
+
+.dashboard-container .dashboard-section h2,
+.dashboard-container .doctor-care-panel h2,
+.dashboard-container .doctor-care-panel label {
+  color: #173f40 !important;
+}
+
+.dashboard-container .doctor-care-panel .form-help {
+  color: #416260 !important;
+}
+
+.dashboard-container .care-active-patient {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  margin: -.25rem -.25rem 1.1rem;
+  padding: .8rem 1rem;
+  border-left: 6px solid #b77a21;
+  border-radius: 8px;
+  background: #f5e5c4;
+  color: #563b16;
+}
+
+.dashboard-container .care-active-patient span {
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.dashboard-container .care-active-patient strong {
+  font-size: 1.15rem;
+  color: #3b2a12;
+}
+
+.dashboard-container .care-active-patient em {
+  margin-left: auto;
+  font-size: .82rem;
+  font-style: normal;
+  color: #6c522b;
+}
+
+@media (max-width: 640px) {
+  .dashboard-container .care-active-patient { align-items: flex-start; flex-direction: column; gap: .2rem; }
+  .dashboard-container .care-active-patient em { margin-left: 0; }
+}

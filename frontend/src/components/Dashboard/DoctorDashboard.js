@@ -352,6 +352,11 @@ const DoctorDashboard = () => {
         ) : <div className="card"><div className="empty-state"><p>Nenhuma consulta encontrada para os filtros selecionados.</p></div></div>}
       </div>}
       {activeTab === 'care' && recordForm && <div className="dashboard-section card doctor-care-panel">
+        <div className="care-active-patient">
+          <span>ATENDIMENTO EM ANDAMENTO</span>
+          <strong>{selectedAppointment?.patient_name || activeAppointment?.patient_name || 'Paciente selecionado'}</strong>
+          <em>Laudo vinculado a esta consulta</em>
+        </div>
         <h2>Laudo do paciente {selectedAppointment?.patient_name || 'selecionado'}</h2>
         <p className="form-help">Preencha o laudo após chamar o paciente. Ele ficará vinculado a esta consulta.</p>
         <form className="appointment-form" onSubmit={saveRecord}>
