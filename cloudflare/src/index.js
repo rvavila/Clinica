@@ -79,6 +79,16 @@ export default {
       if (path === '/api/auth/login' && request.method === 'POST') { const data = await body(request); const user = await env.DB.prepare('SELECT * FROM users WHERE email=?').bind(data.email).first(); if (!user || user.status !== 'active' || !(await verifyPassword(data.password, user.hashed_password))) return error('Email ou senha inválidos', 401, origin); return json({ access_token: await createToken(user, env.SECRET_KEY), token_type: 'bearer', user: userResponse(user) }, 200, origin); }
       const user = await currentUser(request, env); if (!user) return error('Não autenticado', 401, origin);
       if (path === '/api/auth/me') return json(userResponse(user), 200, origin);
+      if (path === '/api/medical-records' && request.method === 'GET' && user.role === 'patient') {
+        const patient = await env.DB.prepare('SELECT id FROM patients WHERE user_id=?').bind(user.id).first();
+        if (!patient) return json([], 200, origin);
+        const appointmentId = Number(url.searchParams.get('appointment_id')) || null;
+        const query = appointmentId
+          ? 'SELECT id,patient_id,appointment_id,prescription,created_at,updated_at FROM medical_records WHERE patient_id=? AND appointment_id=? ORDER BY created_at DESC'
+          : 'SELECT id,patient_id,appointment_id,prescription,created_at,updated_at FROM medical_records WHERE patient_id=? ORDER BY created_at DESC';
+        const params = appointmentId ? [patient.id, appointmentId] : [patient.id];
+        return json((await env.DB.prepare(query).bind(...params).all()).results, 200, origin);
+      }
 
       if (path === '/api/appointments' && request.method === 'GET') {
         const params = []; let where = ''; if (user.role === 'patient') { const patient = await env.DB.prepare('SELECT id FROM patients WHERE user_id=?').bind(user.id).first(); where = 'WHERE a.patient_id=?'; params.push(patient?.id || 0); } else if (user.role === 'doctor') { const doctor = await env.DB.prepare('SELECT id FROM doctors WHERE user_id=?').bind(user.id).first(); where = 'WHERE a.doctor_id=?'; params.push(doctor?.id || 0); } return json(await detailedAppointments(env, where, params), 200, origin);

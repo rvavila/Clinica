@@ -7,7 +7,7 @@ from app.crud import DoctorCRUD, PatientCRUD
 from app.db.database import get_db
 from app.models.medical_record import MedicalRecord
 from app.models.appointment import Appointment
-from app.schemas.medical_record_schema import MedicalRecordCreate, MedicalRecordUpdate, MedicalRecordResponse
+from app.schemas.medical_record_schema import MedicalRecordCreate, MedicalRecordUpdate, MedicalRecordResponse, PatientPrescriptionResponse
 
 router = APIRouter(prefix="/api/medical-records", tags=["medical-records"])
 
@@ -24,7 +24,7 @@ def _can_access(record, current_user, db):
     )
 
 
-@router.get("/", response_model=list[MedicalRecordResponse])
+@router.get("/", response_model=list[MedicalRecordResponse | PatientPrescriptionResponse])
 async def list_medical_records(
     appointment_id: int | None = Query(None),
     current_user: dict = Depends(get_current_user),
@@ -40,6 +40,17 @@ async def list_medical_records(
     if current_user["role"] == UserRole.PATIENT.value:
         patient = PatientCRUD.get_by_user_id(db, current_user["user_id"])
         records = records.filter(MedicalRecord.patient_id == patient.id if patient else False)
+        return [
+            PatientPrescriptionResponse(
+                id=record.id,
+                patient_id=record.patient_id,
+                appointment_id=record.appointment_id,
+                prescription=record.prescription,
+                created_at=record.created_at,
+                updated_at=record.updated_at,
+            )
+            for record in records.order_by(MedicalRecord.created_at.desc()).all()
+        ]
     elif current_user["role"] == UserRole.DOCTOR.value:
         doctor = DoctorCRUD.get_by_user_id(db, current_user["user_id"])
         records = records.filter(MedicalRecord.doctor_id == doctor.id if doctor else False)

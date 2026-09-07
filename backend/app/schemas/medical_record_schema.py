@@ -55,3 +55,14 @@ class MedicalRecordResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class PatientPrescriptionResponse(BaseModel):
+    """Únicos dados clínicos que podem ser visualizados pelo paciente."""
+
+    id: int
+    patient_id: int
+    appointment_id: Optional[int]
+    prescription: Optional[str]
+    created_at: datetime
+    updated_at: datetime

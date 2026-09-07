@@ -9,7 +9,6 @@ const PatientDashboard = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [records, setRecords] = useState([]);
-  const [selectedRecord, setSelectedRecord] = useState(null);
   const currentMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey);
 
@@ -124,11 +123,6 @@ const PatientDashboard = () => {
                     {records.find((record) => record.appointment_id === appt.id)?.prescription || 'Não disponível'}
                   </td>
                   <td>
-                    {records.some((record) => record.appointment_id === appt.id) && (
-                      <button type="button" className="btn btn-secondary" onClick={() => setSelectedRecord(selectedRecord?.appointment_id === appt.id ? null : records.find((record) => record.appointment_id === appt.id))}>
-                        {selectedRecord?.appointment_id === appt.id ? 'Fechar laudo' : 'Ver laudo'}
-                      </button>
-                    )}
                     {['scheduled', 'confirmed', 'Agendada', 'agendada'].includes(appt.status) ? (
                       <button type="button" className="btn btn-secondary" onClick={() => cancelAppointment(appt)}>
                         Cancelar
@@ -140,15 +134,6 @@ const PatientDashboard = () => {
                     )}
                   </td>
                 </tr>
-                {selectedRecord?.appointment_id === appt.id && <tr className="expanded-record-row"><td colSpan="6">
-                  <div className="inline-medical-record">
-                    <h3>Laudo da consulta</h3>
-                    <p><strong>Diagnóstico:</strong> {selectedRecord.diagnosis}</p>
-                    {selectedRecord.treatment_plan && <p><strong>Tratamento:</strong> {selectedRecord.treatment_plan}</p>}
-                    {selectedRecord.prescription && <p><strong>Medicamentos, horários e dias:</strong><br />{selectedRecord.prescription}</p>}
-                    {selectedRecord.medical_certificate && <p><strong>Atestado:</strong><br />{selectedRecord.medical_certificate}</p>}
-                  </div>
-                </td></tr>}
                 </React.Fragment>
               ))}
             </tbody>
