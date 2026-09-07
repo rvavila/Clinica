@@ -84,6 +84,14 @@ export default {
         const patient = await detailedPatients(env, 'WHERE p.id=?', [Number(patientDetailMatch[1])]);
         return patient[0] ? json(patient[0], 200, origin) : error('Paciente não encontrado', 404, origin);
       }
+      if (appointmentMatch && request.method === 'GET') {
+        const appointments = await detailedAppointments(env, 'WHERE a.id=?', [Number(appointmentMatch[1])]);
+        return appointments[0] ? json(appointments[0], 200, origin) : error('Agendamento não encontrado', 404, origin);
+      }
+      if (doctorUpdateMatch && request.method === 'GET') {
+        const doctors = await detailedDoctors(env, 'WHERE d.id=?', [Number(doctorUpdateMatch[1])]);
+        return doctors[0] ? json(doctors[0], 200, origin) : error('Médico não encontrado', 404, origin);
+      }
       return error('Rota não encontrada',404,origin);
     } catch (exception) { return error(exception.message || 'Erro interno do servidor',500,origin); }
   },
