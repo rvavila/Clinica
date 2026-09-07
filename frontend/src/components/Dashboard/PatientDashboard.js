@@ -47,10 +47,10 @@ const PatientDashboard = () => {
     }
   };
 
-  const monthOptions = [...new Set(appointments.map((appointment) => {
+  const monthOptions = [...new Set([currentMonthKey, ...appointments.map((appointment) => {
     const date = new Date(appointment.appointment_datetime);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-  }))].sort();
+  })])].sort().reverse();
   const monthAppointments = selectedMonth === 'all'
     ? appointments
     : appointments.filter((appointment) => {
@@ -73,17 +73,27 @@ const PatientDashboard = () => {
       {message && <div className="alert alert-success">{message}</div>}
       {error && <div className="alert alert-error">{error}</div>}
 
-      <div className="patient-month-filter">
-        <label htmlFor="patient-month">Visualizar mês</label>
-        <select id="patient-month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)}>
-          <option value="all">Todos os meses</option>
-          {monthOptions.map((monthKey) => {
-            const [year, month] = monthKey.split('-');
-            return <option key={monthKey} value={monthKey}>
-              {new Date(Number(year), Number(month) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-            </option>;
-          })}
-        </select>
+      <div className="patient-month-filter" aria-label="Filtro por mês">
+        <div className="patient-month-filter-title">
+          <span className="patient-filter-icon" aria-hidden="true">▦</span>
+          <div>
+            <strong>Período das consultas</strong>
+            <small>Escolha o mês que deseja visualizar</small>
+          </div>
+        </div>
+        <label className="patient-month-select" htmlFor="patient-month">
+          <span>Mês</span>
+          <select id="patient-month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)}>
+            <option value="all">Todos os meses</option>
+            {monthOptions.map((monthKey) => {
+              const [year, month] = monthKey.split('-');
+              return <option key={monthKey} value={monthKey}>
+                {new Date(Number(year), Number(month) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+              </option>;
+            })}
+          </select>
+        </label>
+        <span className="patient-month-count">{monthAppointments.length} {monthAppointments.length === 1 ? 'consulta' : 'consultas'}</span>
       </div>
 
       {loading ? (
