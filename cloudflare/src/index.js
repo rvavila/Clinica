@@ -65,6 +65,25 @@ export default {
       if (path === '/api/medical-records' && request.method === 'GET') { let where='',params=[]; if(user.role==='patient'){const p=await env.DB.prepare('SELECT id FROM patients WHERE user_id=?').bind(user.id).first();where='WHERE m.patient_id=?';params=[p?.id||0];} if(user.role==='doctor'){const d=await env.DB.prepare('SELECT id FROM doctors WHERE user_id=?').bind(user.id).first();where='WHERE m.doctor_id=?';params=[d?.id||0];} const aid=url.searchParams.get('appointment_id');if(aid){where+=(where?' AND':'WHERE')+' m.appointment_id=?';params.push(Number(aid));} return json((await env.DB.prepare(`SELECT m.* FROM medical_records m ${where} ORDER BY m.created_at DESC`).bind(...params).all()).results,200,origin); }
       const recordMatch=path.match(/^\/api\/medical-records\/(\d+)$/); if((path==='/api/medical-records'||recordMatch)&&['POST','PUT'].includes(request.method)){if(user.role!=='doctor')return error('Somente o médico pode editar o laudo.',403,origin);const data=await body(request);const id=recordMatch?Number(recordMatch[1]):null;const stamp=now();if(id){const fields=Object.entries(data);await env.DB.prepare(`UPDATE medical_records SET ${fields.map(([key])=>`${key}=?`).join(',')},updated_at=? WHERE id=?`).bind(...fields.map(([,value])=>value),stamp,id).run();return json(await env.DB.prepare('SELECT * FROM medical_records WHERE id=?').bind(id).first(),200,origin);}const result=await env.DB.prepare('INSERT INTO medical_records (patient_id,doctor_id,appointment_id,chief_complaint,diagnosis,treatment_plan,prescription,medical_certificate,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)').bind(data.patient_id,data.doctor_id,data.appointment_id||null,data.chief_complaint,data.diagnosis,data.treatment_plan||null,data.prescription||null,data.medical_certificate||null,stamp,stamp).run();if(data.appointment_id)await env.DB.prepare('UPDATE appointments SET status="completed",updated_at=? WHERE id=?').bind(stamp,data.appointment_id).run();return json(await env.DB.prepare('SELECT * FROM medical_records WHERE id=?').bind(result.meta.last_row_id).first(),201,origin);}
       if(path==='/api/notifications'&&request.method==='GET')return json((await env.DB.prepare('SELECT * FROM notifications WHERE recipient_user_id=? ORDER BY created_at DESC,id DESC LIMIT 30').bind(user.id).all()).results,200,origin);
+      const doctorUpdateMatch = path.match(/^\/api\/doctors\/(\d+)$/);
+      if (doctorUpdateMatch && request.method === 'PUT') {
+        if (!['doctor', 'reception', 'admin'].includes(user.role)) return error('Acesso negado', 403, origin);
+        const data = await body(request); const fields = Object.entries(data).filter(([key]) => ['crm', 'specialty', 'bio', 'office_phone', 'vacation_start', 'vacation_end'].includes(key));
+        if (fields.length) await env.DB.prepare(`UPDATE doctors SET ${fields.map(([key]) => `${key}=?`).join(',')}, updated_at=? WHERE id=?`).bind(...fields.map(([, value]) => value), now(), Number(doctorUpdateMatch[1])).run();
+        return json((await detailedDoctors(env, 'WHERE d.id=?', [Number(doctorUpdateMatch[1])]))[0], 200, origin);
+      }
+      const userMatch = path.match(/^\/api\/users\/(\d+)(\/password)?$/);
+      if (userMatch && request.method === 'PUT') {
+        const targetId = Number(userMatch[1]); const data = await body(request);
+        if (userMatch[2]) { if (!['reception', 'admin'].includes(user.role)) return error('Acesso negado', 403, origin); await env.DB.prepare('UPDATE users SET hashed_password=?, updated_at=? WHERE id=?').bind(await hashPassword(data.password), now(), targetId).run(); }
+        else { if (user.id !== targetId && !['reception', 'admin'].includes(user.role)) return error('Acesso negado', 403, origin); const fields = Object.entries(data).filter(([key]) => ['email', 'full_name', 'phone', 'cpf', 'status'].includes(key)); if (fields.length) await env.DB.prepare(`UPDATE users SET ${fields.map(([key]) => `${key}=?`).join(',')}, updated_at=? WHERE id=?`).bind(...fields.map(([, value]) => value), now(), targetId).run(); }
+        return json(userResponse(await env.DB.prepare('SELECT * FROM users WHERE id=?').bind(targetId).first()), 200, origin);
+      }
+      const patientDetailMatch = path.match(/^\/api\/patients\/(\d+)$/);
+      if (patientDetailMatch && request.method === 'GET') {
+        const patient = await detailedPatients(env, 'WHERE p.id=?', [Number(patientDetailMatch[1])]);
+        return patient[0] ? json(patient[0], 200, origin) : error('Paciente não encontrado', 404, origin);
+      }
       return error('Rota não encontrada',404,origin);
     } catch (exception) { return error(exception.message || 'Erro interno do servidor',500,origin); }
   },

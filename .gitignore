@@ -45,6 +45,10 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 frontend/build/
 
+# Cloudflare
+cloudflare/node_modules/
+cloudflare/.wrangler/
+
 # Mobile
 mobile/node_modules/
 mobile/.expo/
