@@ -4,6 +4,7 @@ import notificationService from '../../services/notificationService';
 import medicalRecordService from '../../services/medicalRecordService';
 import { appointmentStatusLabel, consultationTypeLabel } from '../../utils/appointmentLabels';
 import { ageLabel } from '../../utils/patientInfo';
+import { sortAppointmentsByDate } from '../../utils/appointmentSort';
 
 const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState([]);
@@ -50,11 +51,11 @@ const DoctorDashboard = () => {
   const todayOpenAppointments = todayAppointments
     .filter((appt) => ['scheduled', 'confirmed', 'in_progress'].includes(appt.status))
     .sort((first, second) => new Date(first.appointment_datetime) - new Date(second.appointment_datetime));
-  const todayCompletedAppointments = todayAppointments.filter((appt) => appt.status === 'completed');
+  const todayCompletedAppointments = sortAppointmentsByDate(todayAppointments.filter((appt) => appt.status === 'completed'));
 
   // A agenda operacional do médico mostra somente consultas pendentes ou em atendimento.
   // Consultas encerradas continuam no histórico para permitir a edição do laudo.
-  const visibleAppointments = appointments.filter((appt) => {
+  const visibleAppointments = sortAppointmentsByDate(appointments.filter((appt) => {
     const appointmentDate = new Date(appt.appointment_datetime);
     const appointmentMonth = `${appointmentDate.getFullYear()}-${String(appointmentDate.getMonth() + 1).padStart(2, '0')}`;
     const search = agendaSearch.trim().toLowerCase();
@@ -64,7 +65,7 @@ const DoctorDashboard = () => {
       || appt.status === agendaStatus;
     const matchesMonth = agendaMonth === 'all' || appointmentMonth === agendaMonth;
     return matchesSearch && matchesMonth && matchesStatus;
-  });
+  }));
   const agendaMonthOptions = [...new Set(appointments.map((appt) => {
     const date = new Date(appt.appointment_datetime);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;

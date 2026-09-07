@@ -5,6 +5,7 @@ import patientService from '../../services/patientService';
 import userService from '../../services/userService';
 import notificationService from '../../services/notificationService';
 import { appointmentStatusLabel, consultationTypeLabel } from '../../utils/appointmentLabels';
+import { sortAppointmentsByDate } from '../../utils/appointmentSort';
 import { ageLabel } from '../../utils/patientInfo';
 
 const appointmentTimeSlots = Array.from({ length: 29 }, (_, index) => {
@@ -401,7 +402,7 @@ const ReceptionDashboard = () => {
     (appt) => ['scheduled', 'confirmed'].includes(appt.status)
   );
 
-  const filteredAppointments = appointments.filter((appointment) => {
+  const filteredAppointments = sortAppointmentsByDate(appointments.filter((appointment) => {
     const search = appointmentSearch.trim().toLowerCase();
     const appointmentDate = new Date(appointment.appointment_datetime);
     const today = new Date();
@@ -416,7 +417,7 @@ const ReceptionDashboard = () => {
       || (appointmentPeriod === 'upcoming' && appointmentDate >= today && appointment.status !== 'cancelled')
       || (appointmentPeriod === 'history' && ['completed', 'cancelled'].includes(appointment.status));
     return matchesSearch && matchesStatus && matchesPeriod;
-  });
+  }));
   const appointmentsPerPage = 10;
   const appointmentTotalPages = Math.max(1, Math.ceil(filteredAppointments.length / appointmentsPerPage));
   const visibleAppointments = filteredAppointments.slice(

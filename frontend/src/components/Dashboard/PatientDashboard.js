@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import appointmentService from '../../services/appointmentService';
 import { appointmentStatusLabel } from '../../utils/appointmentLabels';
 import medicalRecordService from '../../services/medicalRecordService';
+import { sortAppointmentsByDate } from '../../utils/appointmentSort';
 
 const PatientDashboard = () => {
   const [appointments, setAppointments] = useState([]);
@@ -54,12 +55,12 @@ const PatientDashboard = () => {
     const date = new Date(appointment.appointment_datetime);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   })])].sort().reverse();
-  const monthAppointments = selectedMonth === 'all'
+  const monthAppointments = sortAppointmentsByDate(selectedMonth === 'all'
     ? appointments
     : appointments.filter((appointment) => {
       const date = new Date(appointment.appointment_datetime);
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` === selectedMonth;
-    });
+    }));
   const appointmentsByMonth = monthAppointments.reduce((groups, appointment) => {
     const date = new Date(appointment.appointment_datetime);
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
