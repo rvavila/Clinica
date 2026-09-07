@@ -1101,3 +1101,46 @@
 }
 .reception-today-list .today-appointment-card:hover::before { background: var(--teal); }
 .reception-today-list .today-appointment-card.is-active::before { background: #c58a2d; }
+
+/* Padrão visual para todas as listas do sistema, sem o efeito de bloco branco. */
+.dashboard-container .appointments-table {
+  overflow: hidden;
+  border: 1px solid #cbded7;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(33, 79, 80, .06);
+}
+
+.dashboard-container .appointments-table tbody tr:not(.expanded-record-row):not(.expanded-medication-row) {
+  background: #ffffff;
+  border-bottom: 1px solid #cbded7;
+}
+
+.dashboard-container .appointments-table tbody tr:nth-child(even):not(.expanded-record-row):not(.expanded-medication-row) {
+  background: #f4f9f7;
+}
+
+.dashboard-container .appointments-table tbody tr:not(.expanded-record-row):not(.expanded-medication-row):hover,
+.dashboard-container .appointments-table tbody tr:not(.expanded-record-row):not(.expanded-medication-row):hover td {
+  background: #eaf5f0 !important;
+  color: #243f40 !important;
+}
+
+.dashboard-container .appointments-table tbody tr:last-child { border-bottom: 0; }
+
+.dashboard-container .notification-list {
+  padding: 0;
+  overflow: hidden;
+  border-color: #cbded7;
+  background: #ffffff;
+}
+
+.dashboard-container .notification-list p {
+  margin: 0;
+  padding: .85rem 1rem;
+  border-bottom: 1px solid #cbded7;
+  background: #ffffff;
+}
+
+.dashboard-container .notification-list p:nth-child(even) { background: #f4f9f7; }
+.dashboard-container .notification-list p:last-child { border-bottom: 0; }
