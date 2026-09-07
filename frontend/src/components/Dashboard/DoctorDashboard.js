@@ -47,7 +47,9 @@ const DoctorDashboard = () => {
     const today = new Date().toDateString();
     return apptDate === today && appt.status !== 'cancelled';
   });
-  const todayOpenAppointments = todayAppointments.filter((appt) => ['scheduled', 'confirmed', 'in_progress'].includes(appt.status));
+  const todayOpenAppointments = todayAppointments
+    .filter((appt) => ['scheduled', 'confirmed', 'in_progress'].includes(appt.status))
+    .sort((first, second) => new Date(first.appointment_datetime) - new Date(second.appointment_datetime));
   const todayCompletedAppointments = todayAppointments.filter((appt) => appt.status === 'completed');
 
   // A agenda operacional do médico mostra somente consultas pendentes ou em atendimento.
