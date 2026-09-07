@@ -6,7 +6,7 @@ import userService from '../../services/userService';
 import notificationService from '../../services/notificationService';
 import { appointmentStatusLabel, consultationTypeLabel } from '../../utils/appointmentLabels';
 
-const appointmentTimeSlots = Array.from({ length: 25 }, (_, index) => {
+const appointmentTimeSlots = Array.from({ length: 29 }, (_, index) => {
   const totalMinutes = 8 * 60 + index * 30;
   return `${String(Math.floor(totalMinutes / 60)).padStart(2, '0')}:${String(totalMinutes % 60).padStart(2, '0')}`;
 });
@@ -508,7 +508,7 @@ const ReceptionDashboard = () => {
             <input name="appointment_date" type="date" min={todayKey} value={formData.appointment_date} onChange={handleChange} required />
           </label>
           <label>
-            Horário (intervalos de 30 minutos)
+            Horário — das 08:00 às 22:00
             <select name="appointment_time" value={formData.appointment_time} onChange={handleChange} required>
               <option value="">Selecione um horário</option>
               {availableTimeSlots.map((time) => <option key={time} value={time}>{time}</option>)}
