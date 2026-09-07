@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import authService from '../services/authService';
+import { getApiErrorMessage } from '../utils/errorMessages';
 import './Auth.css';
 
 const RegisterPage = () => {
@@ -49,6 +50,7 @@ const RegisterPage = () => {
         state: { message: 'Registro realizado com sucesso! Faça login agora.' },
       });
     } catch (err) {
+      setError(getApiErrorMessage(err, 'Não foi possível criar a conta. Verifique os dados e tente novamente.'));
       const detail = err.response?.data?.detail;
       if (Array.isArray(detail)) {
         setError(detail.map((item) => `${item.loc?.[item.loc.length - 1] || 'campo'}: ${item.msg}`).join(' | '));
