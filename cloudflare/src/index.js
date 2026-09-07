@@ -1,6 +1,6 @@
 const json = (data, status = 200, origin = '*') => new Response(JSON.stringify(data), {
   status,
-  headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': origin, 'access-control-allow-headers': 'Content-Type, Authorization', 'access-control-allow-methods': 'GET, POST, PUT, OPTIONS' },
+  headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': origin, 'access-control-allow-headers': 'Content-Type, Authorization', 'access-control-allow-methods': 'GET, POST, PUT, PATCH, OPTIONS' },
 });
 const error = (message, status = 400, origin = '*') => json({ detail: message }, status, origin);
 const now = () => new Date().toISOString();
@@ -17,6 +17,8 @@ const validateScheduleSlot = (value) => {
   return null;
 };
 const userResponse = (row) => row && ({ id: row.id, email: row.email, full_name: row.full_name, phone: row.phone, cpf: row.cpf, role: row.role, status: row.status, created_at: row.created_at, updated_at: row.updated_at });
+const empty = (status = 204, origin = '*') => new Response(null, { status, headers: { 'access-control-allow-origin': origin, 'access-control-allow-headers': 'Content-Type, Authorization', 'access-control-allow-methods': 'GET, POST, PUT, PATCH, OPTIONS' } });
+const audit = (env, userId, action, entity, entityId = null, details = null) => env.DB.prepare('INSERT INTO audit_logs (user_id,action,entity,entity_id,details,created_at) VALUES (?,?,?,?,?,?)').bind(userId || null, action, entity, entityId, details ? JSON.stringify(details) : null, now()).run();
 
 const bytesToBase64 = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const base64ToBytes = (value) => Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), (char) => char.charCodeAt(0));
@@ -42,18 +44,23 @@ const detailedDoctors = async (env, where = '', params = []) => (await env.DB.pr
 
 export default {
   async fetch(request, env) {
-    const origin = env.CORS_ORIGINS || '*';
+    const configuredOrigins = (env.CORS_ORIGINS || '').split(',').map((value) => value.trim()).filter(Boolean);
+    const requestOrigin = request.headers.get('Origin');
+    const origin = requestOrigin && configuredOrigins.includes(requestOrigin) ? requestOrigin : (requestOrigin && configuredOrigins.length ? configuredOrigins[0] : '*');
     if (request.method === 'OPTIONS') return json({}, 200, origin);
     const url = new URL(request.url); const path = url.pathname.replace(/\/$/, '');
     try {
       if (path === '/health') return json({ status: 'healthy', app: env.APP_NAME || 'Clínica Médica API' }, 200, origin);
       if (path === '/api/auth/register' && request.method === 'POST') {
-        const data = await body(request); if (data.role === 'patient') return error('O paciente deve ser cadastrado pela recepção', 403, origin);
+        const data = await body(request); if (!['doctor', 'reception'].includes(data.role)) return error('O cadastro público permite somente contas de médico ou recepção.', 422, origin);
         if (!data.full_name || !data.email || !data.cpf || !data.password) return error('Nome, email, CPF e senha são obrigatórios.', 422, origin);
         if (data.password.length < 8) return error('A senha deve ter no mínimo 8 caracteres.', 422, origin);
+        if (!/^\S+@\S+\.\S+$/.test(data.email)) return error('Informe um email válido.', 422, origin);
+        if (!/^\d{11}$/.test(String(data.cpf).replace(/\D/g, ''))) return error('Informe um CPF válido com 11 dígitos.', 422, origin);
         if (await env.DB.prepare('SELECT id FROM users WHERE email=?').bind(data.email).first()) return error('Este email já está cadastrado.', 409, origin);
         if (await env.DB.prepare('SELECT id FROM users WHERE cpf=?').bind(data.cpf).first()) return error('Este CPF já está cadastrado.', 409, origin);
         const stamp = now(); const password = await hashPassword(data.password); const result = await env.DB.prepare('INSERT INTO users (email,full_name,phone,cpf,hashed_password,role,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?, ?,?)').bind(data.email, data.full_name, data.phone || null, data.cpf, password, data.role || 'patient', 'active', stamp, stamp).run();
+        await audit(env, result.meta.last_row_id, 'created', 'user', result.meta.last_row_id, { role: data.role });
         return json(userResponse(await env.DB.prepare('SELECT * FROM users WHERE id=?').bind(result.meta.last_row_id).first()), 201, origin);
       }
       if (path === '/api/auth/login' && request.method === 'POST') { const data = await body(request); const user = await env.DB.prepare('SELECT * FROM users WHERE email=?').bind(data.email).first(); if (!user || user.status !== 'active' || !(await verifyPassword(data.password, user.hashed_password))) return error('Email ou senha inválidos', 401, origin); return json({ access_token: await createToken(user, env.SECRET_KEY), token_type: 'bearer', user: userResponse(user) }, 200, origin); }
@@ -78,6 +85,9 @@ export default {
       const appointmentMatch = path.match(/^\/api\/appointments\/(\d+)$/); const cancelMatch = path.match(/^\/api\/appointments\/(\d+)\/cancel$/);
       if (appointmentMatch && request.method === 'PUT') {
         const id = Number(appointmentMatch[1]); const data = await body(request);
+        const appointment = await env.DB.prepare('SELECT a.*, p.user_id patient_user_id, d.user_id doctor_user_id FROM appointments a JOIN patients p ON p.id=a.patient_id JOIN doctors d ON d.id=a.doctor_id WHERE a.id=?').bind(id).first();
+        if (!appointment) return error('Agendamento não encontrado', 404, origin);
+        if (user.role === 'patient' || (user.role === 'doctor' && appointment.doctor_user_id !== user.id)) return error('Você não tem permissão para alterar este agendamento.', 403, origin);
         const fields = Object.entries(data).filter(([key]) => ['appointment_datetime','status','consultation_type','notes','cancel_reason','room_id'].includes(key));
         if (data.appointment_datetime) {
           const scheduleError = validateScheduleSlot(data.appointment_datetime);
@@ -91,7 +101,10 @@ export default {
           const active = await env.DB.prepare('SELECT a.id FROM appointments a JOIN doctors d ON d.id=a.doctor_id WHERE d.user_id=? AND a.status=? AND a.id<>?').bind(user.id, 'in_progress', id).first();
           if (active) return error('Encerre o atendimento atual antes de chamar outro paciente.', 409, origin);
         }
+        if (data.status && !['scheduled', 'in_progress', 'completed', 'cancelled'].includes(data.status)) return error('Status de consulta inválido.', 422, origin);
+        if (data.status === 'completed' && user.role !== 'doctor') return error('Somente o médico pode concluir o atendimento.', 403, origin);
         if (fields.length) await env.DB.prepare(`UPDATE appointments SET ${fields.map(([key]) => `${key}=?`).join(',')}, updated_at=? WHERE id=?`).bind(...fields.map(([, value]) => value), now(), id).run();
+        await audit(env, user.id, 'updated', 'appointment', id, { fields: fields.map(([key]) => key) });
         if (user.role === 'doctor' && data.status === 'in_progress') {
           const appointment = await env.DB.prepare('SELECT a.*, p.user_id patient_user_id, d.user_id doctor_user_id, pu.full_name patient_name FROM appointments a JOIN patients p ON p.id=a.patient_id JOIN doctors d ON d.id=a.doctor_id JOIN users pu ON pu.id=p.user_id WHERE a.id=?').bind(id).first();
           if (appointment) {
@@ -102,9 +115,9 @@ export default {
         }
         return json((await detailedAppointments(env, 'WHERE a.id=?', [id]))[0], 200, origin);
       }
-      if (cancelMatch && request.method === 'POST') { const id = Number(cancelMatch[1]); const appointment = await env.DB.prepare('SELECT a.*, p.user_id patient_user_id, d.user_id doctor_user_id FROM appointments a JOIN patients p ON p.id=a.patient_id JOIN doctors d ON d.id=a.doctor_id WHERE a.id=?').bind(id).first(); if (!appointment) return error('Agendamento não encontrado',404,origin); if (user.role === 'patient' && appointment.patient_user_id !== user.id) return error('Acesso negado',403,origin); await env.DB.prepare('UPDATE appointments SET status=?, updated_at=? WHERE id=?').bind('cancelled', now(), id).run(); const recipients = [appointment.patient_user_id, appointment.doctor_user_id, ...(await env.DB.prepare("SELECT id FROM users WHERE role='reception'").all()).results.map((row) => row.id)]; const message = `A consulta de ${new Date(appointment.appointment_datetime).toLocaleString('pt-BR')} foi cancelada.`; await env.DB.batch([...new Set(recipients)].map((recipient) => env.DB.prepare('INSERT INTO notifications (recipient_user_id,appointment_id,message,created_at) VALUES (?,?,?,?)').bind(recipient,id,message,now()))); return json((await detailedAppointments(env, 'WHERE a.id=?', [id]))[0], 200, origin); }
+      if (cancelMatch && request.method === 'POST') { const id = Number(cancelMatch[1]); const appointment = await env.DB.prepare('SELECT a.*, p.user_id patient_user_id, d.user_id doctor_user_id FROM appointments a JOIN patients p ON p.id=a.patient_id JOIN doctors d ON d.id=a.doctor_id WHERE a.id=?').bind(id).first(); if (!appointment) return error('Agendamento não encontrado',404,origin); if (!['scheduled', 'in_progress'].includes(appointment.status)) return error('Esta consulta não pode mais ser cancelada.', 409, origin); if ((user.role === 'patient' && appointment.patient_user_id !== user.id) || (user.role === 'doctor' && appointment.doctor_user_id !== user.id)) return error('Você não tem permissão para cancelar esta consulta.',403,origin); const reason = url.searchParams.get('reason') || null; await env.DB.prepare('UPDATE appointments SET status=?, cancel_reason=?, updated_at=? WHERE id=?').bind('cancelled', reason, now(), id).run(); await audit(env, user.id, 'cancelled', 'appointment', id, { reason }); const recipients = [appointment.patient_user_id, appointment.doctor_user_id, ...(await env.DB.prepare("SELECT id FROM users WHERE role='reception'").all()).results.map((row) => row.id)]; const message = `A consulta de ${new Date(appointment.appointment_datetime).toLocaleString('pt-BR')} foi cancelada.`; await env.DB.batch([...new Set(recipients)].map((recipient) => env.DB.prepare('INSERT INTO notifications (recipient_user_id,appointment_id,message,created_at) VALUES (?,?,?,?)').bind(recipient,id,message,now()))); return json((await detailedAppointments(env, 'WHERE a.id=?', [id]))[0], 200, origin); }
 
-      if (appointmentMatch && request.method === 'DELETE') { if (!['reception', 'admin'].includes(user.role)) return error('Acesso negado', 403, origin); await env.DB.prepare('DELETE FROM appointments WHERE id=?').bind(Number(appointmentMatch[1])).run(); return json({}, 204, origin); }
+      if (appointmentMatch && request.method === 'DELETE') { if (!['reception', 'admin'].includes(user.role)) return error('Acesso negado', 403, origin); await env.DB.prepare('DELETE FROM appointments WHERE id=?').bind(Number(appointmentMatch[1])).run(); await audit(env, user.id, 'deleted', 'appointment', Number(appointmentMatch[1])); return empty(204, origin); }
       if (path === '/api/patients' && request.method === 'GET') { if (user.role === 'patient') { const patient = await env.DB.prepare('SELECT id FROM patients WHERE user_id=?').bind(user.id).first(); return json(await detailedPatients(env, 'WHERE p.id=?', [patient?.id || 0]), 200, origin); } return json(await detailedPatients(env), 200, origin); }
       if (path === '/api/patients' && request.method === 'POST') { if (!['reception', 'admin'].includes(user.role)) return error('Acesso negado', 403, origin); const data = await body(request); const stamp = now(); const result = await env.DB.prepare('INSERT INTO users (email,full_name,phone,cpf,hashed_password,role,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)').bind(data.email,data.full_name,data.phone||null,data.cpf||null,await hashPassword(data.password || crypto.randomUUID()),'patient','active',stamp,stamp).run(); await env.DB.prepare('INSERT INTO patients (user_id,date_of_birth,gender,created_at,updated_at) VALUES (?,?,?,?,?)').bind(result.meta.last_row_id,data.date_of_birth||null,data.gender||null,stamp,stamp).run(); return json((await detailedPatients(env,'WHERE p.user_id=?',[result.meta.last_row_id]))[0],201,origin); }
       if (path === '/api/patients/register' && request.method === 'POST') { if (!['reception','admin'].includes(user.role)) return error('Acesso negado', 403, origin); const data = await body(request); const stamp = now(); const password = await hashPassword(data.password); const result = await env.DB.prepare('INSERT INTO users (email,full_name,phone,cpf,hashed_password,role,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)').bind(data.email,data.full_name,data.phone||null,data.cpf,password,'patient','active',stamp,stamp).run(); await env.DB.prepare('INSERT INTO patients (user_id,date_of_birth,gender,created_at,updated_at) VALUES (?,?,?,?,?)').bind(result.meta.last_row_id,data.date_of_birth||null,data.gender||null,stamp,stamp).run(); return json((await detailedPatients(env,'WHERE p.user_id=?',[result.meta.last_row_id]))[0],201,origin); }

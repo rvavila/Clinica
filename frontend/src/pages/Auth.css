@@ -151,3 +151,12 @@
   color: #164b31 !important;
   font-weight: 650;
 }
+
+@media (max-width: 600px) {
+  .auth-container { align-items: flex-start; padding: 1rem .65rem; }
+  .auth-form { padding: 1.25rem; margin: .5rem 0; border-radius: 14px; }
+  .auth-form h1 { font-size: 1.35rem; }
+  .auth-form h2 { margin-bottom: 1.25rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { font-size: .9rem; }
+}

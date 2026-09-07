@@ -99,6 +99,16 @@ CREATE TABLE IF NOT EXISTS notifications (
   read_at TEXT
 );
 
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  entity TEXT NOT NULL,
+  entity_id INTEGER,
+  details TEXT,
+  created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS doctor_schedules (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   doctor_id INTEGER NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
@@ -130,3 +140,5 @@ CREATE TABLE IF NOT EXISTS payments (
 CREATE INDEX IF NOT EXISTS idx_appointments_datetime ON appointments(appointment_datetime);
 CREATE INDEX IF NOT EXISTS idx_appointments_doctor ON appointments(doctor_id, appointment_datetime);
 CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON notifications(recipient_user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity, entity_id);

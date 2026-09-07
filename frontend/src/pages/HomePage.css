@@ -236,3 +236,21 @@
 /* Hover acessível na apresentação institucional */
 .home-container button:hover, .home-container .btn:hover { color: #24363a !important; }
 .home-container .btn-primary:hover { color: #ffffff !important; }
+
+@media (max-width: 600px) {
+  .home-header { padding: .8rem 0; }
+  .home-header .header-content { padding: 0 .8rem; align-items: stretch; gap: .7rem; }
+  .home-header h1 { font-size: 1.25rem; }
+  .header-nav { width: 100%; justify-content: space-between; gap: .5rem; }
+  .header-nav span { font-size: .8rem; }
+  .header-nav .btn { padding: .55rem .7rem; font-size: .85rem; }
+  .home-main { padding: 1rem .75rem 2rem; }
+  .hero { min-height: 0; margin-bottom: 2rem; padding: 2rem 1.25rem; border-radius: 16px; }
+  .hero::before, .hero::after { opacity: .35; transform: scale(.65); transform-origin: right center; }
+  .hero h2 { font-size: 2.25rem; max-width: 100%; }
+  .hero p { font-size: .95rem; margin-bottom: 1.4rem; }
+  .hero .btn { width: 100%; }
+  .features h3 { font-size: 1.7rem; margin-bottom: 1rem; }
+  .features-grid { gap: .75rem; }
+  .feature-card { padding: 1.15rem; }
+}

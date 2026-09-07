@@ -10,3 +10,4 @@ database_id = "54387694-5a9f-4b58-b1b6-e69344f7f780"
 [vars]
 APP_NAME = "Clínica Médica API"
 ACCESS_TOKEN_EXPIRE_MINUTES = "30"
+CORS_ORIGINS = "https://clinica-88h.pages.dev"

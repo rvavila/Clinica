@@ -345,6 +345,42 @@
 .dashboard-container .btn-secondary:hover, .dashboard-container .doctor-tabs button:hover:not(.active), .dashboard-container .reception-nav button:hover:not(.active) { background: #d8e9e4 !important; color: #214f50 !important; }
 .appointments-table tbody tr:hover, .appointments-table tbody tr:hover td { background: #f1f8f5 !important; color: #24363a !important; }
 
+/* Experiência mobile: o painel se adapta sem cortar informações nem ações. */
+@media (max-width: 600px) {
+  .dashboard-header { padding: .8rem 0; }
+  .dashboard-header .header-content { align-items: stretch; padding: 0 .8rem; }
+  .dashboard-header h1 { font-size: 1.05rem; }
+  .header-kicker, .header-date { display: none; }
+  .header-user { gap: .6rem; flex-wrap: wrap; }
+  .user-meta { min-width: 0; flex: 1; }
+  .user-meta strong { display: block; max-width: 15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .header-user .btn { padding: .55rem .75rem; font-size: .85rem; }
+  .dashboard-main { padding: 1.25rem .75rem 2.5rem; }
+  .page-intro h2 { font-size: 1.5rem; }
+  .page-intro p { font-size: .9rem; }
+  .reception-nav, .doctor-tabs { grid-template-columns: 1fr 1fr; gap: .35rem; }
+  .reception-nav button, .doctor-tabs button { min-height: 2.6rem; padding: .55rem .4rem; font-size: .78rem; }
+  .card, .dashboard-card, .appointment-form { padding: 1rem; margin-bottom: 1rem; }
+  .dashboard-grid { gap: .75rem; margin-bottom: 1.25rem; }
+  .dashboard-section { margin-bottom: 1.25rem; }
+  .dashboard-section h2 { font-size: 1.25rem; margin-bottom: .7rem; }
+  .appointment-form { grid-template-columns: 1fr; gap: .75rem; }
+  .form-actions { flex-direction: column; }
+  .form-actions .btn { width: 100%; }
+  .appointment-filters { grid-template-columns: 1fr; padding: .65rem; gap: .55rem; }
+  .today-appointment-card, .reception-call-panel, .doctor-call-panel { padding: 1rem !important; }
+  .today-appointment-card { flex-wrap: wrap; gap: .65rem; }
+  .today-appointment-card > div { min-width: 0; }
+  .today-appointment-card strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .appointments-table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .appointments-table th, .appointments-table td { padding: .65rem .7rem; }
+  .appointments-table .form-actions { flex-direction: row; min-width: 12rem; }
+  .appointments-table .form-actions .btn { width: auto; white-space: nowrap; }
+  .pagination-controls { gap: .5rem; flex-wrap: wrap; }
+  .pagination-controls .btn { padding: .55rem .7rem; }
+  .inline-medical-record { overflow-wrap: anywhere; }
+}
+
 /* Contraste definitivo para o status Agendada */
 .dashboard-container .status-badge.status-scheduled,
 .dashboard-container .today-appointment-card .status-badge.status-scheduled,
