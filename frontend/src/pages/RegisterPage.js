@@ -49,7 +49,16 @@ const RegisterPage = () => {
         state: { message: 'Registro realizado com sucesso! Faça login agora.' },
       });
     } catch (err) {
-      setError(err.response?.data?.detail || 'Erro ao registrar');
+      const detail = err.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        setError(detail.map((item) => `${item.loc?.[item.loc.length - 1] || 'campo'}: ${item.msg}`).join(' | '));
+      } else if (typeof detail === 'string') {
+        setError(detail);
+      } else if (err.request && !err.response) {
+        setError('Não foi possível conectar ao servidor. Tente novamente em alguns instantes.');
+      } else {
+        setError('Não foi possível criar a conta. Verifique os dados e tente novamente.');
+      }
     } finally {
       setLoading(false);
     }

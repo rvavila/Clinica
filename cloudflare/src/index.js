@@ -49,7 +49,10 @@ export default {
       if (path === '/health') return json({ status: 'healthy', app: env.APP_NAME || 'Clínica Médica API' }, 200, origin);
       if (path === '/api/auth/register' && request.method === 'POST') {
         const data = await body(request); if (data.role === 'patient') return error('O paciente deve ser cadastrado pela recepção', 403, origin);
-        if (await env.DB.prepare('SELECT id FROM users WHERE email=? OR cpf=?').bind(data.email, data.cpf).first()) return error('Email ou CPF já registrado', 400, origin);
+        if (!data.full_name || !data.email || !data.cpf || !data.password) return error('Nome, email, CPF e senha são obrigatórios.', 422, origin);
+        if (data.password.length < 8) return error('A senha deve ter no mínimo 8 caracteres.', 422, origin);
+        if (await env.DB.prepare('SELECT id FROM users WHERE email=?').bind(data.email).first()) return error('Este email já está cadastrado.', 409, origin);
+        if (await env.DB.prepare('SELECT id FROM users WHERE cpf=?').bind(data.cpf).first()) return error('Este CPF já está cadastrado.', 409, origin);
         const stamp = now(); const password = await hashPassword(data.password); const result = await env.DB.prepare('INSERT INTO users (email,full_name,phone,cpf,hashed_password,role,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?, ?,?)').bind(data.email, data.full_name, data.phone || null, data.cpf, password, data.role || 'patient', 'active', stamp, stamp).run();
         return json(userResponse(await env.DB.prepare('SELECT * FROM users WHERE id=?').bind(result.meta.last_row_id).first()), 201, origin);
       }
