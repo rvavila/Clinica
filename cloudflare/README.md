@@ -6,14 +6,17 @@ Esta pasta contém a preparação para executar a API da clínica em Cloudflare 
 
 - `schema.sql` reproduz as tabelas usadas pela aplicação atual.
 - `wrangler.toml` define o Worker e o binding D1.
-- O backend FastAPI/PostgreSQL original continua preservado até a nova API ser validada.
+- `src/index.js` contém a API migrada para Workers + D1: autenticação, usuários, pacientes, médicos, consultas, cancelamentos, avisos e laudos editáveis.
+- O banco local usado nos testes foi limpo. O banco remoto deve ser criado vazio no primeiro deploy.
+- O backend FastAPI/PostgreSQL original continua preservado como referência até a validação em produção.
 
 ## Próximas etapas
 
 1. Criar o banco D1 e substituir `database_id` em `wrangler.toml`.
-2. Portar autenticação, usuários, pacientes, médicos, consultas, laudos e avisos para o Worker.
-3. Configurar `REACT_APP_API_URL` no Cloudflare Pages.
-4. Executar os testes de integração e publicar a API.
+2. Executar `schema.sql` remotamente e definir `SECRET_KEY` como secret do Worker.
+3. Publicar o Worker e copiar a URL gerada.
+4. Configurar `REACT_APP_API_URL` no Cloudflare Pages.
+5. Executar os testes de integração e publicar o frontend.
 
 ## Publicação
 
