@@ -171,8 +171,16 @@ const DoctorDashboard = () => {
       <div className="doctor-call-panel">
         <div>
           <span className="doctor-call-kicker">Atendimento da vez</span>
-          <h2>{activeAppointment ? activeAppointment.patient_name : 'Próximo paciente'}</h2>
-          <p>{activeAppointment ? 'Paciente chamado. O atendimento está em andamento.' : 'Selecione o próximo paciente para iniciar o atendimento.'}</p>
+          <h2>{activeAppointment
+            ? activeAppointment.patient_name
+            : nextAppointment
+              ? `Próximo: ${nextAppointment.patient_name}`
+              : 'Atendimentos do dia encerrados'}</h2>
+          <p>{activeAppointment
+            ? 'Paciente chamado. O atendimento está em andamento.'
+            : nextAppointment
+              ? 'O próximo paciente está aguardando para ser chamado.'
+              : 'Não há mais pacientes aguardando atendimento hoje.'}</p>
         </div>
         {!activeAppointment && nextAppointment && (
           <button type="button" className="btn btn-primary doctor-call-button" onClick={() => changeAppointmentStatus(nextAppointment, 'in_progress')}>
