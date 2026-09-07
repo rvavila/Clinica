@@ -7,11 +7,8 @@ const AdminDashboard = () => {
     patients: 0,
     appointments: 0,
   });
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     // Simular carregamento de estatísticas
-    setLoading(false);
     setStats({
       users: 0,
       doctors: 0,
