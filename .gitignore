@@ -48,6 +48,7 @@ frontend/build/
 # Cloudflare
 cloudflare/node_modules/
 cloudflare/.wrangler/
+.wrangler/
 
 # Mobile
 mobile/node_modules/

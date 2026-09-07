@@ -135,3 +135,19 @@
 
 .auth-container button:hover, .auth-container .btn:hover { color: #24363a !important; }
 .auth-container .btn-primary:hover { color: #ffffff !important; }
+
+/* Alertas do login/cadastro permanecem legíveis no fundo claro. */
+.auth-form .alert-error {
+  background: #fff1f0 !important;
+  border: 1px solid #c9433d !important;
+  border-left: 4px solid #a52b27 !important;
+  color: #721c1c !important;
+  font-weight: 650;
+}
+.auth-form .alert-success {
+  background: #edf9f2 !important;
+  border: 1px solid #2e8059 !important;
+  border-left: 4px solid #236344 !important;
+  color: #164b31 !important;
+  font-weight: 650;
+}
