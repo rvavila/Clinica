@@ -1102,6 +1102,69 @@
 .reception-today-list .today-appointment-card:hover::before { background: var(--teal); }
 .reception-today-list .today-appointment-card.is-active::before { background: #c58a2d; }
 
+/* Filtro rápido do paciente: útil e compacto, sem ocupar uma faixa inteira. */
+.patient-month-filter {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  max-width: 100%;
+  margin: 0 0 1rem;
+  padding: .65rem .8rem;
+  border-left-width: 3px;
+  border-radius: 11px;
+}
+
+.patient-month-filter-title { flex: 1 1 auto; gap: .55rem; }
+.patient-filter-icon { flex-basis: 2.1rem; width: 2.1rem; height: 2.1rem; font-size: 1rem; border-radius: 8px; }
+.patient-month-filter-title strong { font-size: .88rem; }
+.patient-month-filter-title small { font-size: .72rem; }
+.patient-period-options { display: flex; align-items: center; gap: .35rem; flex: 0 1 auto; }
+.patient-period-options button {
+  min-height: 2.3rem;
+  padding: .5rem .7rem;
+  border: 1px solid #c8ddd5;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #315d5b;
+  font-size: .78rem;
+  font-weight: 750;
+  white-space: nowrap;
+  box-shadow: none;
+}
+.patient-period-options button:hover,
+.patient-period-options button.active {
+  background: #2f716c !important;
+  border-color: #2f716c;
+  color: #ffffff !important;
+}
+.patient-period-options .patient-month-select { margin: 0; }
+.patient-period-options select {
+  width: 8.5rem;
+  height: 2.3rem;
+  padding: .4rem .55rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 700;
+}
+.patient-month-count { flex: 0 0 auto; min-width: 5.5rem; padding: .55rem .65rem; font-size: .74rem; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 800px) {
+  .patient-month-filter { flex-wrap: wrap; }
+  .patient-month-filter-title { flex: 1 1 100%; }
+  .patient-period-options { flex: 1 1 auto; min-width: 0; }
+  .patient-period-options button { flex: 1 1 auto; padding-inline: .55rem; }
+  .patient-period-options select { width: 7.2rem; }
+}
+
+@media (max-width: 520px) {
+  .patient-period-options { width: 100%; flex-wrap: wrap; }
+  .patient-period-options button { flex: 1 1 calc(33.333% - .35rem); }
+  .patient-period-options .patient-month-select { flex: 1 1 100%; }
+  .patient-period-options select { width: 100%; }
+  .patient-month-count { margin-left: auto; }
+}
+
 /* Padrão visual para todas as listas do sistema, sem o efeito de bloco branco. */
 .dashboard-container .appointments-table {
   overflow: hidden;

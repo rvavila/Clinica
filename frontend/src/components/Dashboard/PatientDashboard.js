@@ -11,6 +11,8 @@ const PatientDashboard = () => {
   const [records, setRecords] = useState([]);
   const [expandedMedicationId, setExpandedMedicationId] = useState(null);
   const currentMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  const nextMonthDate = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+  const nextMonthKey = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, '0')}`;
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey);
 
   useEffect(() => {
@@ -48,7 +50,7 @@ const PatientDashboard = () => {
     }
   };
 
-  const monthOptions = [...new Set([currentMonthKey, ...appointments.map((appointment) => {
+  const monthOptions = [...new Set([currentMonthKey, nextMonthKey, ...appointments.map((appointment) => {
     const date = new Date(appointment.appointment_datetime);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   })])].sort().reverse();
@@ -74,26 +76,31 @@ const PatientDashboard = () => {
       {message && <div className="alert alert-success">{message}</div>}
       {error && <div className="alert alert-error">{error}</div>}
 
-      <div className="patient-month-filter" aria-label="Filtro por mês">
+      <div className="patient-month-filter" aria-label="Filtro por período">
         <div className="patient-month-filter-title">
           <span className="patient-filter-icon" aria-hidden="true">▦</span>
           <div>
-            <strong>Período das consultas</strong>
-            <small>Escolha o mês que deseja visualizar</small>
+            <strong>Visualizar consultas</strong>
+            <small>Escolha um período rápido</small>
           </div>
         </div>
-        <label className="patient-month-select" htmlFor="patient-month">
-          <span>Mês</span>
-          <select id="patient-month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)}>
-            <option value="all">Todos os meses</option>
-            {monthOptions.map((monthKey) => {
-              const [year, month] = monthKey.split('-');
-              return <option key={monthKey} value={monthKey}>
-                {new Date(Number(year), Number(month) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-              </option>;
-            })}
-          </select>
-        </label>
+        <div className="patient-period-options">
+          <button type="button" className={selectedMonth === currentMonthKey ? 'active' : ''} onClick={() => setSelectedMonth(currentMonthKey)}>Mês atual</button>
+          <button type="button" className={selectedMonth === nextMonthKey ? 'active' : ''} onClick={() => setSelectedMonth(nextMonthKey)}>Próximo mês</button>
+          <button type="button" className={selectedMonth === 'all' ? 'active' : ''} onClick={() => setSelectedMonth('all')}>Todos</button>
+          <label className="patient-month-select" htmlFor="patient-month">
+            <span className="sr-only">Outro mês</span>
+            <select id="patient-month" value={![currentMonthKey, nextMonthKey, 'all'].includes(selectedMonth) ? selectedMonth : ''} onChange={(event) => event.target.value && setSelectedMonth(event.target.value)}>
+              <option value="">Outro mês</option>
+              {monthOptions.filter((monthKey) => ![currentMonthKey, nextMonthKey].includes(monthKey)).map((monthKey) => {
+                const [year, month] = monthKey.split('-');
+                return <option key={monthKey} value={monthKey}>
+                  {new Date(Number(year), Number(month) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                </option>;
+              })}
+            </select>
+          </label>
+        </div>
         <span className="patient-month-count">{monthAppointments.length} {monthAppointments.length === 1 ? 'consulta' : 'consultas'}</span>
       </div>
 
