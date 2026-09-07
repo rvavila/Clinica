@@ -1,8 +1,6 @@
 name: Deploy Clínica na Cloudflare
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:

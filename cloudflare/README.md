@@ -35,7 +35,7 @@ No Cloudflare Pages, importe o repositório `rvavila/Clinica`, use `frontend` co
 
 ## Deploy automatizado da API
 
-O workflow `.github/workflows/deploy-cloudflare.yml` publica o Worker pelo GitHub Actions a cada push na `main`. Como o Pages está conectado ao GitHub, ele publica o frontend diretamente pela integração Git.
+O workflow `.github/workflows/deploy-cloudflare.yml` publica o Worker pelo GitHub Actions quando acionado manualmente. Como o Pages está conectado ao GitHub, ele publica o frontend diretamente pela integração Git.
 
 Se a conexão Git do Pages voltar a falhar, crie o projeto Pages uma vez para usar o workflow de upload direto:
 
