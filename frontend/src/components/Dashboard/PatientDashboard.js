@@ -104,6 +104,7 @@ const PatientDashboard = () => {
                 <th>Especialidade</th>
                 <th>Data/Hora</th>
                 <th>Status</th>
+                <th>Medicação receitada</th>
                 <th>Ação</th>
               </tr>
             </thead>
@@ -118,6 +119,9 @@ const PatientDashboard = () => {
                     <span className={`status-badge status-${appt.status}`}>
                       {appointmentStatusLabel(appt.status)}
                     </span>
+                  </td>
+                  <td className="patient-prescription-cell">
+                    {records.find((record) => record.appointment_id === appt.id)?.prescription || 'Não disponível'}
                   </td>
                   <td>
                     {records.some((record) => record.appointment_id === appt.id) && (
@@ -136,7 +140,7 @@ const PatientDashboard = () => {
                     )}
                   </td>
                 </tr>
-                {selectedRecord?.appointment_id === appt.id && <tr className="expanded-record-row"><td colSpan="5">
+                {selectedRecord?.appointment_id === appt.id && <tr className="expanded-record-row"><td colSpan="6">
                   <div className="inline-medical-record">
                     <h3>Laudo da consulta</h3>
                     <p><strong>Diagnóstico:</strong> {selectedRecord.diagnosis}</p>

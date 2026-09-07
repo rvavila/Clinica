@@ -3,6 +3,7 @@ import appointmentService from '../../services/appointmentService';
 import notificationService from '../../services/notificationService';
 import medicalRecordService from '../../services/medicalRecordService';
 import { appointmentStatusLabel, consultationTypeLabel } from '../../utils/appointmentLabels';
+import { ageLabel } from '../../utils/patientInfo';
 
 const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState([]);
@@ -188,6 +189,7 @@ const DoctorDashboard = () => {
               <div className={`today-appointment-card ${appt.status === 'in_progress' ? 'is-active' : ''}`} key={appt.id}>
                 <div>
                   <strong>{appt.patient_name}</strong>
+                  <span>{ageLabel(appt.patient_date_of_birth)} · {appt.doctor_specialty}</span>
                   <span>{consultationTypeLabel(appt.consultation_type)} · {new Date(appt.appointment_datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <div className="today-appointment-actions">
@@ -349,11 +351,11 @@ const DoctorDashboard = () => {
       </div>}
       {activeTab === 'dashboard' && recordMessage && <div className="alert alert-success">{recordMessage}</div>}
       {activeTab === 'dashboard' && <div className="dashboard-section doctor-notifications">
-        <h2>Avisos</h2>
+        <h2>Cancelamentos recentes</h2>
         <div className="card notification-list">
           {notifications.length > 0 ? notifications.map((notification) => (
             <p key={notification.id}>{notification.message}</p>
-          )) : <p>Nenhum aviso novo.</p>}
+          )) : <p>Nenhum cancelamento recente.</p>}
         </div>
       </div>}
     </div>

@@ -816,3 +816,27 @@
 
   input, select, textarea, button, .btn { max-width: 100%; }
 }
+
+/* Densidade mais confortável: informações importantes aparecem mais cedo. */
+.dashboard-main { padding-top: 1.35rem; }
+.page-intro { margin-bottom: 1.15rem; }
+.page-intro h2 { font-size: clamp(1.65rem, 3vw, 2.2rem); }
+.dashboard-section { margin-bottom: 1.35rem; }
+.doctor-tabs, .reception-nav { margin-bottom: 1.15rem; }
+.patient-prescription-cell {
+  min-width: 15rem;
+  max-width: 24rem;
+  white-space: pre-line !important;
+  line-height: 1.45;
+}
+
+@media (max-width: 600px) {
+  .dashboard-main { padding: .9rem .7rem 1.75rem !important; }
+  .page-intro { margin-bottom: .85rem !important; }
+  .page-intro .eyebrow, .page-intro p { display: none; }
+  .page-intro h2 { margin: 0; font-size: 1.35rem; }
+  .dashboard-section { margin-bottom: 1rem; }
+  .doctor-tabs, .reception-nav { margin-bottom: .85rem; }
+  .today-appointment-card { padding: .8rem !important; }
+  .today-appointment-card span:not(.status-badge) { margin-top: .12rem; }
+}

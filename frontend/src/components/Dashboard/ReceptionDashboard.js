@@ -5,6 +5,7 @@ import patientService from '../../services/patientService';
 import userService from '../../services/userService';
 import notificationService from '../../services/notificationService';
 import { appointmentStatusLabel, consultationTypeLabel } from '../../utils/appointmentLabels';
+import { ageLabel } from '../../utils/patientInfo';
 
 const appointmentTimeSlots = Array.from({ length: 29 }, (_, index) => {
   const totalMinutes = 8 * 60 + index * 30;
@@ -463,7 +464,6 @@ const ReceptionDashboard = () => {
               <option value="">Não informado</option>
               <option value="Feminino">Feminino</option>
               <option value="Masculino">Masculino</option>
-              <option value="Outro">Outro</option>
             </select>
           </label>
           <label>
@@ -567,7 +567,6 @@ const ReceptionDashboard = () => {
                 <option value="">Não informado</option>
                 <option value="Feminino">Feminino</option>
                 <option value="Masculino">Masculino</option>
-                <option value="Outro">Outro</option>
               </select>
             </label>
             <label>
@@ -592,6 +591,8 @@ const ReceptionDashboard = () => {
                   <th>Paciente</th>
                   <th>Email</th>
                   <th>CPF</th>
+                  <th>Idade</th>
+                  <th>Telefone</th>
                   <th>Ação</th>
                 </tr>
               </thead>
@@ -601,6 +602,8 @@ const ReceptionDashboard = () => {
                     <td>{patient.full_name}</td>
                     <td>{patient.email}</td>
                     <td>{patient.cpf}</td>
+                    <td>{ageLabel(patient.date_of_birth)}</td>
+                    <td>{patient.phone || 'Não informado'}</td>
                     <td>
                       <button type="button" className="btn btn-secondary" onClick={() => startEditingPatient(patient)}>
                         Editar
@@ -776,7 +779,8 @@ const ReceptionDashboard = () => {
               <div className={`today-appointment-card ${appt.status === 'in_progress' ? 'is-active' : ''}`} key={appt.id}>
                 <div>
                   <strong>{appt.patient_name}</strong>
-                  <span>{appt.doctor_name} · {new Date(appt.appointment_datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span>{ageLabel(appt.patient_date_of_birth)} · {appt.doctor_name} ({appt.doctor_specialty})</span>
+                  <span>{consultationTypeLabel(appt.consultation_type)} · {new Date(appt.appointment_datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <span className={`status-badge status-${appt.status}`}>{appointmentStatusLabel(appt.status)}</span>
               </div>
@@ -866,11 +870,11 @@ const ReceptionDashboard = () => {
       </div></>}
 
       {activeView === 'dashboard' && <div className="dashboard-section reception-notifications">
-        <h2>Avisos recentes</h2>
+        <h2>Cancelamentos recentes</h2>
         <div className="card notification-list">
           {notifications.length > 0 ? notifications.map((notification) => (
             <p key={notification.id}>{notification.message}</p>
-          )) : <p>Nenhum aviso novo.</p>}
+          )) : <p>Nenhum cancelamento recente.</p>}
         </div>
       </div>}
     </div>
