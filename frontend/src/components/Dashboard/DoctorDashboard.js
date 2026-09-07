@@ -153,7 +153,7 @@ const DoctorDashboard = () => {
       <div className="doctor-tabs" role="tablist" aria-label="Navegação do médico">
         <button type="button" className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>Dashboard</button>
         <button type="button" className={activeTab === 'agenda' ? 'active' : ''} onClick={() => setActiveTab('agenda')}>Agenda completa</button>
-        <button type="button" className={activeTab === 'care' ? 'active' : ''} onClick={() => setActiveTab('care')} disabled={!recordForm}>Atendimento</button>
+        <button type="button" className={activeTab === 'care' ? 'active' : ''} onClick={() => { if (!recordForm && activeAppointment) openRecord(activeAppointment); else setActiveTab('care'); }} disabled={!recordForm && !activeAppointment}>Atendimento</button>
       </div>
       {activeTab === 'dashboard' && <>
       <div className="doctor-summary-hidden">
@@ -184,6 +184,11 @@ const DoctorDashboard = () => {
               ? 'O próximo paciente está aguardando para ser chamado.'
               : 'Não há mais pacientes aguardando atendimento hoje.'}</p>
         </div>
+        {activeAppointment && !recordForm && (
+          <button type="button" className="btn btn-primary doctor-call-button" onClick={() => openRecord(activeAppointment)}>
+            Retomar atendimento {activeAppointment.patient_name}
+          </button>
+        )}
         {!activeAppointment && nextAppointment && (
           <button type="button" className="btn btn-primary doctor-call-button" onClick={() => changeAppointmentStatus(nextAppointment, 'in_progress')}>
             Chamar paciente {nextAppointment.patient_name}

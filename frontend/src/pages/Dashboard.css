@@ -1236,3 +1236,33 @@
 }
 
 .dashboard-container .appointments-table tbody tr:last-child td { border-bottom: 0 !important; }
+
+/* Divisao forte entre registros para leitura imediata. */
+.dashboard-container .appointments-table {
+  border: 2px solid #83aaa0 !important;
+}
+
+.dashboard-container .appointments-table tbody tr:not(.expanded-record-row):not(.expanded-medication-row) td {
+  border-bottom: 2px solid #a8c7be !important;
+}
+
+.dashboard-container .appointments-table tbody tr:nth-child(even):not(.expanded-record-row):not(.expanded-medication-row) td {
+  background: #dcebe6 !important;
+}
+
+.dashboard-container .appointments-table tbody tr:not(.expanded-record-row):not(.expanded-medication-row):hover td {
+  background: #c2e2d8 !important;
+}
+
+.dashboard-container .reception-today-list .today-appointment-card {
+  background: #edf6f2 !important;
+  border-bottom: 2px solid #a8c7be !important;
+}
+
+.dashboard-container .reception-today-list .today-appointment-card:nth-child(even) {
+  background: #dcebe6 !important;
+}
+
+.dashboard-container .reception-today-list .today-appointment-card:hover {
+  background: #c2e2d8 !important;
+}
