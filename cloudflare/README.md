@@ -2,6 +2,12 @@
 
 Esta pasta contém a preparação para executar a API da clínica em Cloudflare Workers com Cloudflare D1.
 
+## Produção
+
+- Frontend: https://clinica-88h.pages.dev
+- API: https://clinica-api.rv-avila.workers.dev
+- Banco: D1 `clinica-db`
+
 ## Estado atual
 
 - `schema.sql` reproduz as tabelas usadas pela aplicação atual.
