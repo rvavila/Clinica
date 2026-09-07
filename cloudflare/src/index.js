@@ -5,6 +5,17 @@ const json = (data, status = 200, origin = '*') => new Response(JSON.stringify(d
 const error = (message, status = 400, origin = '*') => json({ detail: message }, status, origin);
 const now = () => new Date().toISOString();
 const body = async (request) => request.method === 'GET' || request.method === 'DELETE' ? {} : request.json();
+const validateScheduleSlot = (value) => {
+  const date = new Date(value);
+  if (!value || Number.isNaN(date.getTime())) return 'Informe uma data e horário válidos.';
+  if (date <= new Date()) return 'A consulta precisa ser agendada para o futuro.';
+  const hour = date.getHours();
+  const minutes = date.getMinutes();
+  if (![0, 30].includes(minutes) || date.getSeconds() !== 0 || hour < 8 || hour > 20 || (hour === 20 && minutes !== 0)) {
+    return 'Escolha um horário em intervalos de 30 minutos, entre 08:00 e 20:00.';
+  }
+  return null;
+};
 const userResponse = (row) => row && ({ id: row.id, email: row.email, full_name: row.full_name, phone: row.phone, cpf: row.cpf, role: row.role, status: row.status, created_at: row.created_at, updated_at: row.updated_at });
 
 const bytesToBase64 = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -49,9 +60,45 @@ export default {
       if (path === '/api/appointments' && request.method === 'GET') {
         const params = []; let where = ''; if (user.role === 'patient') { const patient = await env.DB.prepare('SELECT id FROM patients WHERE user_id=?').bind(user.id).first(); where = 'WHERE a.patient_id=?'; params.push(patient?.id || 0); } else if (user.role === 'doctor') { const doctor = await env.DB.prepare('SELECT id FROM doctors WHERE user_id=?').bind(user.id).first(); where = 'WHERE a.doctor_id=?'; params.push(doctor?.id || 0); } return json(await detailedAppointments(env, where, params), 200, origin);
       }
-      if (path === '/api/appointments' && request.method === 'POST') { const data = await body(request); const stamp = now(); const result = await env.DB.prepare('INSERT INTO appointments (patient_id,doctor_id,room_id,appointment_datetime,duration_minutes,status,consultation_type,notes,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)').bind(data.patient_id, data.doctor_id, data.room_id || null, data.appointment_datetime, data.duration_minutes || 30, 'scheduled', data.consultation_type || 'follow_up', data.notes || null, stamp, stamp).run(); return json((await detailedAppointments(env, 'WHERE a.id=?', [result.meta.last_row_id]))[0], 201, origin); }
+      if (path === '/api/appointments' && request.method === 'POST') {
+        const data = await body(request);
+        const scheduleError = validateScheduleSlot(data.appointment_datetime);
+        if (scheduleError) return error(scheduleError, 422, origin);
+        const requestedDate = new Date(data.appointment_datetime);
+        const conflict = await env.DB.prepare("SELECT id FROM appointments WHERE doctor_id=? AND status NOT IN ('cancelled','completed') AND appointment_datetime > ? AND appointment_datetime < ? LIMIT 1")
+          .bind(data.doctor_id, new Date(requestedDate.getTime() - 30 * 60 * 1000).toISOString(), new Date(requestedDate.getTime() + 30 * 60 * 1000).toISOString()).first();
+        if (conflict) return error('Este horário já está ocupado para o médico.', 409, origin);
+        const stamp = now();
+        const result = await env.DB.prepare('INSERT INTO appointments (patient_id,doctor_id,room_id,appointment_datetime,duration_minutes,status,consultation_type,notes,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)').bind(data.patient_id, data.doctor_id, data.room_id || null, data.appointment_datetime, data.duration_minutes || 30, 'scheduled', data.consultation_type || 'follow_up', data.notes || null, stamp, stamp).run();
+        return json((await detailedAppointments(env, 'WHERE a.id=?', [result.meta.last_row_id]))[0], 201, origin);
+      }
       const appointmentMatch = path.match(/^\/api\/appointments\/(\d+)$/); const cancelMatch = path.match(/^\/api\/appointments\/(\d+)\/cancel$/);
-      if (appointmentMatch && request.method === 'PUT') { const id = Number(appointmentMatch[1]); const data = await body(request); const fields = Object.entries(data).filter(([key]) => ['appointment_datetime','status','consultation_type','notes','cancel_reason','room_id'].includes(key)); if (user.role === 'doctor' && data.status === 'in_progress') { const active = await env.DB.prepare('SELECT a.id FROM appointments a JOIN doctors d ON d.id=a.doctor_id WHERE d.user_id=? AND a.status=? AND a.id<>?').bind(user.id, 'in_progress', id).first(); if (active) return error('Encerre o atendimento atual antes de chamar outro paciente.', 409, origin); } if (fields.length) await env.DB.prepare(`UPDATE appointments SET ${fields.map(([key]) => `${key}=?`).join(',')}, updated_at=? WHERE id=?`).bind(...fields.map(([, value]) => value), now(), id).run(); return json((await detailedAppointments(env, 'WHERE a.id=?', [id]))[0], 200, origin); }
+      if (appointmentMatch && request.method === 'PUT') {
+        const id = Number(appointmentMatch[1]); const data = await body(request);
+        const fields = Object.entries(data).filter(([key]) => ['appointment_datetime','status','consultation_type','notes','cancel_reason','room_id'].includes(key));
+        if (data.appointment_datetime) {
+          const scheduleError = validateScheduleSlot(data.appointment_datetime);
+          if (scheduleError) return error(scheduleError, 422, origin);
+          const requestedDate = new Date(data.appointment_datetime);
+          const conflict = await env.DB.prepare("SELECT id FROM appointments WHERE doctor_id=(SELECT doctor_id FROM appointments WHERE id=?) AND id<>? AND status NOT IN ('cancelled','completed') AND appointment_datetime > ? AND appointment_datetime < ? LIMIT 1")
+            .bind(id, id, new Date(requestedDate.getTime() - 30 * 60 * 1000).toISOString(), new Date(requestedDate.getTime() + 30 * 60 * 1000).toISOString()).first();
+          if (conflict) return error('Este horário já está ocupado para o médico.', 409, origin);
+        }
+        if (user.role === 'doctor' && data.status === 'in_progress') {
+          const active = await env.DB.prepare('SELECT a.id FROM appointments a JOIN doctors d ON d.id=a.doctor_id WHERE d.user_id=? AND a.status=? AND a.id<>?').bind(user.id, 'in_progress', id).first();
+          if (active) return error('Encerre o atendimento atual antes de chamar outro paciente.', 409, origin);
+        }
+        if (fields.length) await env.DB.prepare(`UPDATE appointments SET ${fields.map(([key]) => `${key}=?`).join(',')}, updated_at=? WHERE id=?`).bind(...fields.map(([, value]) => value), now(), id).run();
+        if (user.role === 'doctor' && data.status === 'in_progress') {
+          const appointment = await env.DB.prepare('SELECT a.*, p.user_id patient_user_id, d.user_id doctor_user_id, pu.full_name patient_name FROM appointments a JOIN patients p ON p.id=a.patient_id JOIN doctors d ON d.id=a.doctor_id JOIN users pu ON pu.id=p.user_id WHERE a.id=?').bind(id).first();
+          if (appointment) {
+            const receptionUsers = (await env.DB.prepare("SELECT id FROM users WHERE role='reception'").all()).results;
+            const message = `O médico está chamando o paciente ${appointment.patient_name} para entrar.`;
+            await env.DB.batch(receptionUsers.map((recipient) => env.DB.prepare('INSERT INTO notifications (recipient_user_id,appointment_id,message,created_at) VALUES (?,?,?,?)').bind(recipient.id, id, message, now())));
+          }
+        }
+        return json((await detailedAppointments(env, 'WHERE a.id=?', [id]))[0], 200, origin);
+      }
       if (cancelMatch && request.method === 'POST') { const id = Number(cancelMatch[1]); const appointment = await env.DB.prepare('SELECT a.*, p.user_id patient_user_id, d.user_id doctor_user_id FROM appointments a JOIN patients p ON p.id=a.patient_id JOIN doctors d ON d.id=a.doctor_id WHERE a.id=?').bind(id).first(); if (!appointment) return error('Agendamento não encontrado',404,origin); if (user.role === 'patient' && appointment.patient_user_id !== user.id) return error('Acesso negado',403,origin); await env.DB.prepare('UPDATE appointments SET status=?, updated_at=? WHERE id=?').bind('cancelled', now(), id).run(); const recipients = [appointment.patient_user_id, appointment.doctor_user_id, ...(await env.DB.prepare("SELECT id FROM users WHERE role='reception'").all()).results.map((row) => row.id)]; const message = `A consulta de ${new Date(appointment.appointment_datetime).toLocaleString('pt-BR')} foi cancelada.`; await env.DB.batch([...new Set(recipients)].map((recipient) => env.DB.prepare('INSERT INTO notifications (recipient_user_id,appointment_id,message,created_at) VALUES (?,?,?,?)').bind(recipient,id,message,now()))); return json((await detailedAppointments(env, 'WHERE a.id=?', [id]))[0], 200, origin); }
 
       if (path === '/api/patients' && request.method === 'GET') { if (user.role === 'patient') { const patient = await env.DB.prepare('SELECT id FROM patients WHERE user_id=?').bind(user.id).first(); return json(await detailedPatients(env, 'WHERE p.id=?', [patient?.id || 0]), 200, origin); } return json(await detailedPatients(env), 200, origin); }
