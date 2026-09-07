@@ -1207,3 +1207,32 @@
 
 .dashboard-container .notification-list p:nth-child(even) { background: #f4f9f7; }
 .dashboard-container .notification-list p:last-child { border-bottom: 0; }
+
+/* Contraste final das listas: superfícies suaves e divisões visíveis, sem blocos brancos. */
+.dashboard-container .appointments-table {
+  background: #eef5f2 !important;
+  border-color: #b8d2ca !important;
+}
+
+.dashboard-container .appointments-table thead th {
+  background: #dcebe6 !important;
+  color: #173f40 !important;
+  border-bottom: 2px solid #b8d2ca !important;
+}
+
+.dashboard-container .appointments-table tbody tr:not(.expanded-record-row):not(.expanded-medication-row) td {
+  background: #f7fbfa !important;
+  color: #24363a !important;
+  border-bottom: 1px solid #c7dcd5 !important;
+}
+
+.dashboard-container .appointments-table tbody tr:nth-child(even):not(.expanded-record-row):not(.expanded-medication-row) td {
+  background: #edf6f2 !important;
+}
+
+.dashboard-container .appointments-table tbody tr:not(.expanded-record-row):not(.expanded-medication-row):hover td {
+  background: #d9eee7 !important;
+  color: #123b3c !important;
+}
+
+.dashboard-container .appointments-table tbody tr:last-child td { border-bottom: 0 !important; }
