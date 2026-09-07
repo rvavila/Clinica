@@ -43,7 +43,7 @@ const detailedDoctors = async (env, where = '', params = []) => (await env.DB.pr
 export default {
   async fetch(request, env) {
     const origin = env.CORS_ORIGINS || '*';
-    if (request.method === 'OPTIONS') return json({}, 204, origin);
+    if (request.method === 'OPTIONS') return json({}, 200, origin);
     const url = new URL(request.url); const path = url.pathname.replace(/\/$/, '');
     try {
       if (path === '/health') return json({ status: 'healthy', app: env.APP_NAME || 'Clínica Médica API' }, 200, origin);
