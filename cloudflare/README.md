@@ -33,9 +33,11 @@ npx wrangler deploy
 
 No Cloudflare Pages, importe o repositório `rvavila/Clinica`, use `frontend` como diretório raiz, `npm run build` como comando e `build` como diretório de saída. Configure `REACT_APP_API_URL` com a URL do Worker antes da publicação.
 
-## Alternativa sem conexão Git do Pages
+## Deploy automatizado da API
 
-Se o painel do Pages continuar mostrando `Missing git connection`, o workflow `.github/workflows/deploy-cloudflare.yml` publica o Worker e o Pages diretamente pelo GitHub Actions. Nesse caso, crie o projeto Pages uma vez:
+O workflow `.github/workflows/deploy-cloudflare.yml` publica o Worker pelo GitHub Actions a cada push na `main`. Como o Pages está conectado ao GitHub, ele publica o frontend diretamente pela integração Git.
+
+Se a conexão Git do Pages voltar a falhar, crie o projeto Pages uma vez para usar o workflow de upload direto:
 
 ```bash
 npx wrangler pages project create clinica
@@ -47,6 +49,6 @@ Depois, adicione em **Settings > Secrets and variables > Actions** do GitHub:
 - `CLOUDFLARE_ACCOUNT_ID`
 - `REACT_APP_API_URL` (a URL publicada do Worker)
 
-O workflow será executado a cada push na `main` e não depende da conexão Git integrada do painel Pages.
+O frontend deve usar a integração Git normalmente; o workflow atual fica responsável somente pela API.
 
 Nunca coloque valores reais de `SECRET_KEY`, senhas ou tokens neste repositório.
