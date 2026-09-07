@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/appointments", tags=["appointments"])
 
 
 def _validate_schedule_slot(appointment_datetime: datetime):
-    """A agenda usa slots fixos de 30 minutos, das 08:00 às 20:00."""
+    """A agenda usa slots fixos de 30 minutos, das 08:00 às 22:00."""
     sao_paulo = ZoneInfo("America/Sao_Paulo")
     current_datetime = datetime.now(appointment_datetime.tzinfo) if appointment_datetime.tzinfo else datetime.now(sao_paulo).replace(tzinfo=None)
     if appointment_datetime <= current_datetime:
@@ -27,14 +27,14 @@ def _validate_schedule_slot(appointment_datetime: datetime):
     if appointment_datetime.minute not in (0, 30) or appointment_datetime.second or appointment_datetime.microsecond:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Escolha um horário em intervalos de 30 minutos, entre 08:00 e 20:00.",
+            detail="Escolha um horário em intervalos de 30 minutos, entre 08:00 e 22:00.",
         )
-    if appointment_datetime.hour < 8 or appointment_datetime.hour > 20 or (
-        appointment_datetime.hour == 20 and appointment_datetime.minute != 0
+    if appointment_datetime.hour < 8 or appointment_datetime.hour > 22 or (
+        appointment_datetime.hour == 22 and appointment_datetime.minute != 0
     ):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Os agendamentos podem ser marcados somente entre 08:00 e 20:00.",
+            detail="Os agendamentos podem ser marcados somente entre 08:00 e 22:00.",
         )
 
 

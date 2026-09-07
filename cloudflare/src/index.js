@@ -11,8 +11,8 @@ const validateScheduleSlot = (value) => {
   if (date <= new Date()) return 'A consulta precisa ser agendada para o futuro.';
   const hour = date.getHours();
   const minutes = date.getMinutes();
-  if (![0, 30].includes(minutes) || date.getSeconds() !== 0 || hour < 8 || hour > 20 || (hour === 20 && minutes !== 0)) {
-    return 'Escolha um horário em intervalos de 30 minutos, entre 08:00 e 20:00.';
+  if (![0, 30].includes(minutes) || date.getSeconds() !== 0 || hour < 8 || hour > 22 || (hour === 22 && minutes !== 0)) {
+    return 'Escolha um horário em intervalos de 30 minutos, entre 08:00 e 22:00.';
   }
   return null;
 };
